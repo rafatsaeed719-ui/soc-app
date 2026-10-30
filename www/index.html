@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14213d">
+<title>جنود المسيح S.O.C</title>
+<link rel="icon" href="icons/dove.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<script src="config.js"></script>
+<style>
+:root{
+  --navy:#14213d;--navy2:#1f3266;--gold:#e9b949;--gold2:#c9942a;--bg:#f4f1ea;--card:#fff;
+  --ink:#1d2433;--muted:#6b7385;--line:#e6e1d6;--red:#c0392b;--green:#1e8e5a;
+  --r:18px;--sh:0 6px 20px rgba(20,33,61,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,system-ui,sans-serif;font-size:15px}
+body{min-height:100vh;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+body.noNav{padding-bottom:0}
+a{color:var(--navy2)}
+button,input,select,textarea{font-family:inherit;font-size:15px}
+.i3d{width:28px;height:28px;object-fit:contain;vertical-align:middle;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
+.i3d.lg{width:54px;height:54px}.i3d.xl{width:84px;height:84px}.i3d.sm{width:20px;height:20px}
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+.top h1{font-size:18px;margin:0;flex:1;font-weight:800}
+.top .back{background:rgba(255,255,255,.12);border:0;color:#fff;width:38px;height:38px;border-radius:12px;font-size:20px;cursor:pointer}
+.brand{display:flex;align-items:center;gap:8px}
+.brand small{color:var(--gold);font-weight:800;letter-spacing:1px}
+.wrap{max-width:760px;margin:0 auto;padding:14px}
+/* cards */
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:16px}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:8px;align-items:center}
+.row.wrap2{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+/* tiles */
+.hero{background:linear-gradient(135deg,var(--navy),#2a4486);color:#fff;border-radius:22px;padding:16px;display:flex;gap:14px;align-items:center;margin-bottom:14px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;left:-40px;top:-60px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(233,185,73,.28),transparent 70%)}
+.hero h2{margin:0;font-size:18px}
+.hero .muted{color:#cdd6ee}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:linear-gradient(160deg,#fff,#f7f3ea);border-radius:20px;padding:14px 6px 12px;text-align:center;box-shadow:0 8px 18px rgba(20,33,61,.09),inset 0 -3px 0 rgba(0,0,0,.04);cursor:pointer;border:1px solid #efe9dc;transition:transform .15s;position:relative}
+.tile:active{transform:scale(.96)}
+.tile b{display:block;margin-top:6px;font-size:13.5px}
+.tile .badge{position:absolute;top:8px;left:8px}
+.badge:empty{display:none}
+.badge{background:var(--red);color:#fff;border-radius:20px;font-size:11px;padding:1px 7px;font-weight:700}
+/* forms */
+label{display:block;font-weight:700;font-size:13px;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fff;outline:none;color:var(--ink)}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+textarea{min-height:90px;resize:vertical;line-height:1.7}
+.btn{border:0;border-radius:14px;padding:11px 16px;font-weight:700;cursor:pointer;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#2b1d00;box-shadow:0 4px 10px rgba(201,148,42,.3);display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn.block{width:100%;margin-top:14px;padding:13px}
+.btn.navy{background:linear-gradient(135deg,var(--navy2),var(--navy));color:#fff;box-shadow:0 4px 10px rgba(20,33,61,.25)}
+.btn.ghost{background:#fff;color:var(--navy);border:1.5px solid var(--line);box-shadow:none}
+.btn.red{background:#fdecea;color:var(--red);box-shadow:none}
+.btn.green{background:#e3f5ec;color:var(--green);box-shadow:none}
+.btn.sm{padding:7px 11px;font-size:13px;border-radius:11px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:30px;padding:6px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.chip .x{color:var(--red);font-weight:800;margin-inline-start:2px}
+/* avatar */
+.av{width:52px;height:52px;border-radius:50%;object-fit:cover;background:#e9e4d8;flex:none;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.12);display:inline-flex;align-items:center;justify-content:center}
+.av.big{width:110px;height:110px}
+.av.s{width:40px;height:40px}
+/* list */
+.item{display:flex;gap:10px;align-items:center;padding:11px;border-radius:14px;background:#fff;box-shadow:var(--sh);margin-bottom:9px;cursor:pointer}
+.item .t{font-weight:700}
+.empty{text-align:center;padding:30px 10px;color:var(--muted)}
+.tag{display:inline-block;background:#f3ecd9;color:#7a5a12;border-radius:8px;padding:2px 8px;font-size:12px;margin:2px;font-weight:600}
+/* nav */
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.07);z-index:30}
+.nav a{flex:1;text-align:center;text-decoration:none;color:var(--muted);font-size:11.5px;font-weight:700;position:relative;padding-top:2px}
+.nav a.on{color:var(--navy)}
+.nav a .i3d{width:30px;height:30px;display:block;margin:0 auto 1px;transition:transform .15s}
+.nav a.on .i3d{transform:translateY(-3px) scale(1.12)}
+.nav a .badge{position:absolute;top:0;right:calc(50% - 26px)}
+/* footer */
+.dev{text-align:center;padding:18px 10px 8px;color:var(--muted);font-size:13px}
+.dev a{color:var(--gold2);font-weight:800;text-decoration:none;cursor:pointer}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(10,15,30,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:16px 16px calc(18px + env(safe-area-inset-bottom));animation:up .2s}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+.sheet h2{margin:0 0 6px;font-size:18px;display:flex;gap:8px;align-items:center}
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 18px;border-radius:14px;z-index:99;font-weight:700;box-shadow:var(--sh);max-width:90%;text-align:center}
+/* calendar */
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .h{font-size:11.5px;color:var(--muted);font-weight:700;padding:4px 0}
+.cal .d{aspect-ratio:1;border-radius:12px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-weight:700;position:relative;font-size:14px}
+.cal .d.o{opacity:0;pointer-events:none}
+.cal .d.today{outline:2px solid var(--gold)}
+.cal .d.sel{background:var(--navy);color:#fff}
+.cal .d .dots{display:flex;gap:2px;margin-top:2px;height:6px}
+.cal .d .dot{width:6px;height:6px;border-radius:50%;background:var(--gold2)}
+.cal .d .dot.k{background:#6b8de3}
+/* bible */
+.verses{font-family:Amiri,serif;font-size:21px;line-height:2.1}
+.verse{cursor:pointer;border-radius:6px;padding:0 2px}
+.verse sup{color:var(--gold2);font-family:Cairo;font-size:11px;font-weight:800;margin-inline-end:3px}
+.verse.sel{background:#fff1c8}
+.golden{background:linear-gradient(135deg,#fff8e1,#fdeebf);border-radius:14px;padding:12px;font-family:Amiri,serif;font-size:18px;line-height:1.9;border-inline-start:4px solid var(--gold)}
+/* chat */
+.msgs{display:flex;flex-direction:column;gap:6px;padding-bottom:80px}
+.m{max-width:80%;padding:9px 12px;border-radius:16px;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.05);white-space:pre-wrap;word-wrap:break-word;line-height:1.6}
+.m.me{align-self:flex-start;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
+.m.them{align-self:flex-end;border-bottom-left-radius:4px}
+.m .tm{font-size:10.5px;opacity:.6;margin-top:3px}
+.m.inv{background:linear-gradient(135deg,#fff8e1,#fff);color:var(--ink);border:1.5px solid var(--gold);min-width:240px;white-space:normal}
+.composer{position:fixed;bottom:0;left:0;right:0;background:#fff;padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;box-shadow:0 -4px 14px rgba(0,0,0,.07);z-index:31}
+.composer input{flex:1}
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gal img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:pointer;background:#eee}
+.file{display:flex;align-items:center;gap:8px;padding:9px;border:1.5px dashed var(--line);border-radius:12px;margin-top:6px;background:#fff;cursor:pointer}
+.file .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:13.5px}
+.cover{width:62px;height:84px;border-radius:8px;object-fit:cover;background:linear-gradient(135deg,var(--navy2),var(--navy));flex:none;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.15)}
+.tabs{display:flex;background:#fff;border-radius:14px;padding:4px;margin-bottom:12px;box-shadow:var(--sh)}
+.tabs button{flex:1;border:0;background:none;padding:9px;border-radius:11px;font-weight:700;color:var(--muted);cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+.demo{background:#fff3cd;color:#7a5a12;font-size:12px;text-align:center;padding:5px;font-weight:700}
+.auth{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:20px;background:radial-gradient(circle at 80% 0%,#2a4486,var(--navy) 60%)}
+.auth .card{max-width:420px;margin:0 auto;width:100%}
+.auth .logo{text-align:center;color:#fff;margin-bottom:16px}
+.auth .logo h1{margin:6px 0 0;font-size:26px}
+.auth .logo small{color:var(--gold);font-weight:800;letter-spacing:3px}
+.auth .dev{color:#b8c3e0}
+.streak{display:flex;gap:10px;align-items:center}
+.streak b{font-size:28px;color:var(--gold2)}
+.spin{display:inline-block;width:18px;height:18px;border:3px solid rgba(0,0,0,.15);border-top-color:var(--gold2);border-radius:50%;animation:sp 0.8s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="app"><div class="empty" style="padding-top:40vh"><span class="spin"></span></div></div>
+<div id="nav"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+"use strict";
+const CFG = window.SOC_CONFIG || {};
+const DEMO = !CFG.firebase || !window.firebase;
+const DEV_SITE = CFG.developerSite || "https://rafatsaeed.com";
+
+/* ================= helpers ================= */
+const $ = s => document.querySelector(s);
+const h = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const I = (n, c = "") => `<img class="i3d ${c}" src="icons/${n}.png" alt="">`;
+const uidGen = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const norm = s => String(s || "").toLowerCase().replace(/[ً-ْـ]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/\s+/g, " ").trim();
+const digits = s => String(s || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/\D/g, "");
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const DAYS = ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+function fmtDate(s){ if(!s) return ""; const d = new Date(s + "T00:00"); return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`; }
+function fmtTime(t){ if(!t) return ""; let [H,M] = t.split(":").map(Number); const p = H < 12 ? "ص" : "م"; H = H % 12 || 12; return `${H}:${pad(M)} ${p}`; }
+function ago(ts){ const d = new Date(ts), n = new Date(); if (ymd(d) === ymd(n)) return `${d.getHours() % 12 || 12}:${pad(d.getMinutes())} ${d.getHours() < 12 ? "ص" : "م"}`; return `${d.getDate()} ${MONTHS[d.getMonth()]}`; }
+function toast(m){ const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
+function modal(html){ closeModal(); const o = document.createElement("div"); o.className = "ov"; o.id = "ov"; o.innerHTML = `<div class="sheet">${html}</div>`; o.onclick = e => { if (e.target === o) closeModal(); }; document.body.appendChild(o); hydrate(o); return o; }
+function closeModal(){ const o = $("#ov"); if (!o) return; const wasAnn = !!o.querySelector("#annPop"); o.remove(); if (wasAnn){ annPopupOpen = false; markAnnsSeen(); } }
+function openExt(url){
+  try { const Br = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser; if (Br && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) { Br.open({ url }); return; } } catch (e) {}
+  const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
+}
+const footer = () => `<div class="dev">تواصل مع مطور البرنامج<br><a href="${DEV_SITE}" target="_blank" rel="noopener" onclick="if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()){openExt(this.href);return false}">${h(DEV_SITE.replace(/^https?:\/\//, ""))}</a></div>`;
+function busy(btn, on){ if (!btn) return; if (on){ btn.dataset.t = btn.innerHTML; btn.innerHTML = '<span class="spin"></span>'; btn.disabled = true; } else { btn.innerHTML = btn.dataset.t || btn.innerHTML; btn.disabled = false; } }
+function confirmBox(msg){
+  return new Promise(res => {
+    const o = document.createElement("div"); o.className = "ov"; o.style.alignItems = "center"; o.style.zIndex = 60;
+    o.innerHTML = `<div class="sheet" style="border-radius:22px;max-width:360px;margin:16px;text-align:center"><p style="font-weight:700;font-size:16px;margin:8px 0 16px">${h(msg)}</p><div class="row"><button class="btn navy grow" data-y>نعم</button><button class="btn ghost grow" data-n>لا</button></div></div>`;
+    const done = v => { o.remove(); res(v); };
+    o.querySelector("[data-y]").onclick = () => done(true); o.querySelector("[data-n]").onclick = () => done(false); o.onclick = e => { if (e.target === o) done(false); };
+    document.body.appendChild(o);
+  });
+}
+
+const TALENTS = [
+  { k: "word",   n: "خادم كلمة",          i: "speaking_head",    s: "خادم كلمه واعظ" },
+  { k: "praise", n: "خادم تسبيح (مرنم)",  i: "microphone",       s: "خادم تسبيح مرنم مرنمه ترنيم" },
+  { k: "oud",    n: "عازف عود",            i: "banjo",            s: "عازف عود" },
+  { k: "piano",  n: "عازف بيانو",          i: "musical_keyboard", s: "عازف بيانو اورج كيبورد" },
+  { k: "drums",  n: "عازف درامز",          i: "drum",             s: "عازف درامز درمز طبله" },
+  { k: "mizmar", n: "عازف مزمار",          i: "flute",            s: "عازف مزمار ناي فلوت" }
+];
+const tName = k => (TALENTS.find(t => t.k === k) || {}).n || k;
+const tIcon = k => (TALENTS.find(t => t.k === k) || {}).i || "musical_notes";
+const BOOK_CATS = ["روحي","لاهوتي","تفسير","خدمة وقيادة","تربية وأسرة","تسبيح وموسيقى","قصص وسير","أخرى"];
+
+/* ================= demo file store (IndexedDB) ================= */
+const IDB = {
+  db: null,
+  open(){ return this.db ? Promise.resolve(this.db) : new Promise((res, rej) => { const r = indexedDB.open("soc_files", 1); r.onupgradeneeded = () => r.result.createObjectStore("f"); r.onsuccess = () => { this.db = r.result; res(this.db); }; r.onerror = () => rej(r.error); }); },
+  async put(blob){ const db = await this.open(), k = uidGen(); await new Promise((res, rej) => { const t = db.transaction("f", "readwrite"); t.objectStore("f").put(blob, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); return "idb:" + k; },
+  async get(u){ const db = await this.open(); return new Promise(res => { const r = db.transaction("f").objectStore("f").get(u.slice(4)); r.onsuccess = () => res(r.result); r.onerror = () => res(null); }); }
+};
+const urlCache = {};
+async function resolveUrl(u){ if (!u) return ""; if (!u.startsWith("idb:")) return u; if (urlCache[u]) return urlCache[u]; const b = await IDB.get(u); return b ? (urlCache[u] = URL.createObjectURL(b)) : ""; }
+function hydrate(root = document){ root.querySelectorAll("img[data-f]").forEach(async im => { const u = im.dataset.f; im.removeAttribute("data-f"); im.src = await resolveUrl(u); }); }
+async function openFile(u, isImg){
+  const r = await resolveUrl(u); if (!r) return toast("الملف مش موجود");
+  if (isImg){ const o = modal(`<img src="${h(r)}" style="width:100%;border-radius:14px"><div class="row" style="margin-top:10px"><button class="btn ghost grow" onclick="closeModal()">إغلاق</button>${u.startsWith("idb:") ? "" : `<button class="btn navy grow" onclick="openExt('${h(r)}')">فتح / تحميل</button>`}</div>`); return; }
+  openExt(r);
+}
+
+/* image compress */
+function compressImage(file, max = 1280, q = .82){
+  return new Promise(res => {
+    if (!file.type.startsWith("image/") || file.type === "image/gif") return res(file);
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => { let { width: w, height: hh } = img; const s = Math.min(1, max / Math.max(w, hh)); const c = document.createElement("canvas"); c.width = Math.round(w * s); c.height = Math.round(hh * s); c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); c.toBlob(b => { URL.revokeObjectURL(url); res(b ? new File([b], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }) : file); }, "image/jpeg", q); };
+    img.onerror = () => res(file); img.src = url;
+  });
+}
+
+/* ================= backend ================= */
+const B = DEMO ? makeDemo() : makeFirebase();
+
+function makeDemo(){
+  const K = "soc_db_v1", A = "soc_auth_v1", S = "soc_sess_v1";
+  const load = () => { try { return JSON.parse(localStorage.getItem(K)) || {}; } catch (e) { return {}; } };
+  let data = load();
+  const save = () => { try { localStorage.setItem(K, JSON.stringify(data)); } catch (e) { toast("مساحة التخزين التجريبية امتلأت"); } };
+  const watchers = [];
+  const fire = col => watchers.filter(w => w.col === col).forEach(w => w.run());
+  window.addEventListener("storage", e => { if (e.key === K){ data = load(); watchers.forEach(w => w.run()); } });
+  const coll = c => (data[c] = data[c] || {});
+  const match = (d, f, op, v) => op === "array-contains" ? (d[f] || []).includes(v) : d[f] === v;
+  const authDb = () => { try { return JSON.parse(localStorage.getItem(A)) || {}; } catch (e) { return {}; } };
+  let cb = null;
+  const api = {
+    uid: null, phone: null,
+    auth: {
+      onChange(f){ cb = f; const s = localStorage.getItem(S); if (s){ const a = JSON.parse(s); api.uid = a.uid; api.phone = a.phone; } setTimeout(() => f(api.uid), 0); },
+      async signUp(phone, pass){ const db = authDb(); if (db[phone]) throw { code: "auth/email-already-in-use" }; const uid = uidGen(); db[phone] = { pass, uid }; localStorage.setItem(A, JSON.stringify(db)); return api.auth._in(uid, phone); },
+      async signIn(phone, pass){ const a = authDb()[phone]; if (!a) throw { code: "auth/user-not-found" }; if (a.pass !== pass) throw { code: "auth/wrong-password" }; return api.auth._in(a.uid, phone); },
+      _in(uid, phone){ api.uid = uid; api.phone = phone; localStorage.setItem(S, JSON.stringify({ uid, phone })); cb && cb(uid); return uid; },
+      async signOut(){ api.uid = null; localStorage.removeItem(S); cb && cb(null); }
+    },
+    async get(c, id){ const d = coll(c)[id]; return d ? { id, ...d } : null; },
+    async set(c, id, obj){ const cur = coll(c)[id] || {}; const nx = { ...cur }; for (const k in obj){ const v = obj[k]; nx[k] = (v && typeof v === "object" && !Array.isArray(v) && cur[k] && typeof cur[k] === "object" && !Array.isArray(cur[k])) ? { ...cur[k], ...v } : v; } coll(c)[id] = nx; save(); fire(c); },
+    async add(c, obj){ const id = uidGen(); coll(c)[id] = obj; save(); fire(c); return id; },
+    async del(c, id){ delete coll(c)[id]; save(); fire(c); },
+    async where(c, f, op, v){ return Object.entries(coll(c)).filter(([, d]) => match(d, f, op, v)).map(([id, d]) => ({ id, ...d })); },
+    async all(c){ return Object.entries(coll(c)).map(([id, d]) => ({ id, ...d })); },
+    watch(c, f, op, v, fn){ const w = { col: c, run: () => fn(Object.entries(coll(c)).filter(([, d]) => match(d, f, op, v)).map(([id, d]) => ({ id, ...d }))) }; watchers.push(w); w.run(); return () => { const i = watchers.indexOf(w); if (i > -1) watchers.splice(i, 1); }; },
+    async upload(file){ if (file.size > 25 * 1024 * 1024) throw new Error("الملف أكبر من 25 ميجا"); return await IDB.put(file); }
+  };
+  // seed sample servants so search works in the demo
+  if (!data._seeded){
+    const S1 = [
+      ["مينا عادل", ["word"], "شبرا - القاهرة", "كنيسة مارجرجس"],
+      ["مريم سمير", ["praise", "piano"], "المعادي", "كنيسة العذراء"],
+      ["بيشوي نبيل", ["oud", "praise"], "أسيوط", "كنيسة الأنبا أبرام"],
+      ["كيرلس فادي", ["drums"], "الإسكندرية - سيدي بشر", "كنيسة الملاك"],
+      ["مارينا جرجس", ["word", "mizmar"], "المنيا", "كنيسة الإنجيلية الأولى"]
+    ];
+    S1.forEach(([n, t, a, ch], i) => coll("users")["demo" + i] = { name: n, nameN: norm(n), talents: t, custom: [], address: a, church: ch, phone: "0120000000" + i, bio: "", photo: "", createdAt: Date.now() - i * 1000 });
+    coll("books")["demob1"] = { ownerId: "demo0", ownerName: "مينا عادل", title: "كيف تعد عظة؟ (مثال تجريبي)", titleN: norm("كيف تعد عظة"), author: "مثال", category: "خدمة وقيادة", desc: "ده كتاب تجريبي عشان تشوف شكل المكتبة.", files: [], cover: "", createdAt: Date.now() };
+    data._seeded = 1; save();
+  }
+  return api;
+}
+
+function makeFirebase(){
+  firebase.initializeApp(CFG.firebase);
+  const auth = firebase.auth(), db = firebase.firestore();
+  try { db.enablePersistence({ synchronizeTabs: true }).catch(() => {}); } catch (e) {}
+  const map = s => s.docs.map(d => ({ id: d.id, ...d.data() }));
+  const mail = p => p.includes("@") ? p : p + "@soc-app.com";
+  const api = {
+    uid: null, phone: null,
+    auth: {
+      onChange(f){ auth.onAuthStateChanged(u => { api.uid = u ? u.uid : null; api.phone = u ? ((u.email || "").endsWith("@soc-app.com") ? u.email.split("@")[0] : (u.email || "").toLowerCase()) : null; f(api.uid); }); },
+      async signUp(p, pass){ const r = await auth.createUserWithEmailAndPassword(mail(p), pass); return r.user.uid; },
+      async signIn(p, pass){ const r = await auth.signInWithEmailAndPassword(mail(p), pass); return r.user.uid; },
+      signOut(){ return auth.signOut(); }
+    },
+    async get(c, id){ const d = await db.collection(c).doc(id).get(); return d.exists ? { id: d.id, ...d.data() } : null; },
+    set(c, id, o){ return db.collection(c).doc(id).set(o, { merge: true }); },
+    async add(c, o){ const r = await db.collection(c).add(o); return r.id; },
+    del(c, id){ return db.collection(c).doc(id).delete(); },
+    async where(c, f, op, v){ return map(await db.collection(c).where(f, op, v).get()); },
+    async all(c){ return map(await db.collection(c).get()); },
+    watch(c, f, op, v, fn){ return db.collection(c).where(f, op, v).onSnapshot(s => fn(map(s)), e => console.warn(e)); },
+    async upload(file){
+      const cl = CFG.cloudinary || {};
+      if (!cl.cloudName || !cl.uploadPreset) throw new Error("لازم تحط بيانات Cloudinary في ملف config.js");
+      const isImg = file.type.startsWith("image/");
+      const fd = new FormData(); fd.append("file", file); fd.append("upload_preset", cl.uploadPreset);
+      const r = await fetch(`https://api.cloudinary.com/v1_1/${cl.cloudName}/${isImg ? "image" : "raw"}/upload`, { method: "POST", body: fd });
+      const j = await r.json(); if (!r.ok) throw new Error((j.error && j.error.message) || "فشل الرفع");
+      return j.secure_url;
+    }
+  };
+  return api;
+}
+
+function authErr(e){
+  const c = e && e.code || "";
+  if (c.includes("email-already-in-use")) return "الرقم ده متسجل قبل كده، اعمل تسجيل دخول";
+  if (c.includes("user-not-found") || c.includes("invalid-credential") || c.includes("invalid-login")) return "رقم التليفون أو كلمة السر غلط";
+  if (c.includes("wrong-password")) return "كلمة السر غلط";
+  if (c.includes("weak-password")) return "كلمة السر لازم 6 حروف أو أرقام على الأقل";
+  if (c.includes("network")) return "مفيش إنترنت";
+  if (c.includes("too-many")) return "محاولات كتير، استنى شوية وجرب تاني";
+  return (e && e.message) || "حصل خطأ";
+}
+
+/* ================= state & router ================= */
+let ME = null;            // my profile
+let unsubs = [];          // page-level listeners
+let chatUnsub = null, CHATS = [];
+const isAdmin = () => { if (!ME || !B.phone) return false; const id = String(B.phone).toLowerCase(); return id.includes("@") ? (CFG.adminEmails || []).map(x => x.toLowerCase()).includes(id) : (CFG.adminPhones || []).map(digits).includes(digits(id)); };
+
+function go(path){ location.hash = "#/" + path; }
+window.addEventListener("hashchange", route);
+
+B.auth.onChange(async uid => {
+  if (!uid){ ME = null; if (chatUnsub) { chatUnsub(); chatUnsub = null; } if (annUnsub) { annUnsub(); annUnsub = null; } if (curRoute()[0] === "p") return pagePublic(curRoute()[1]); renderAuth(); return; }
+  ME = await B.get("users", uid);
+  if (!ME){ ME = { id: uid, name: window.__newName || "", phone: B.phone, talents: [], custom: [] }; }
+  if (curRoute()[0] === "p"){ watchChats(); watchAnns(); return pagePublic(curRoute()[1]); }
+  if (ME.blocked){ toast("تم إيقاف هذا الحساب من الإدارة"); B.auth.signOut(); return; }
+  watchChats(); watchAnns(); syncReminders();
+  if (!ME.name) go("profile"); else route();
+});
+
+function watchChats(){
+  if (chatUnsub) chatUnsub();
+  chatUnsub = B.watch("chats", "members", "array-contains", B.uid, list => { CHATS = list.sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0)); renderNav(); if (curRoute()[0] === "chats") pageChats(); });
+}
+const unreadCount = () => CHATS.filter(c => c.lastAt && c.lastBy !== B.uid && (c.seen && c.seen[B.uid] || 0) < c.lastAt).length;
+const curRoute = () => (location.hash.replace(/^#\/?/, "") || "home").split("/");
+
+function route(){
+  if (curRoute()[0] === "p"){ closeModal(); return pagePublic(curRoute()[1]); }
+  if (!B.uid) return renderAuth();
+  if (!ME || !ME.name){ const r = curRoute(); if (r[0] !== "profile") return go("profile"); }
+  unsubs.forEach(u => { try { u(); } catch (e) {} }); unsubs = [];
+  closeModal(); window.scrollTo(0, 0);
+  document.body.classList.remove("noNav");
+  const [p, a] = curRoute();
+  const pages = { home: pageHome, profile: pageProfile, user: pageUser, services: pageServices, calendar: pageCalendar, topics: pageTopics, topic: pageTopic, khalwa: pageKhalwa, library: pageLibrary, book: pageBook, search: pageSearch, chats: pageChats, chat: pageChat, admin: pageAdmin, news: pageNews };
+  (pages[p] || pageHome)(a);
+  renderNav();
+  if (typeof unseenAnns === "function") setTimeout(() => { if (B.uid && ME && ME.name && unseenAnns().length && !annPopupOpen && !$("#ov") && !["chat", "news", "profile"].includes(curRoute()[0])) showAnnPopup(); }, 700);
+}
+
+function renderNav(){
+  const n = $("#nav");
+  if (!B.uid || curRoute()[0] === "chat"){ n.innerHTML = ""; return; }
+  const p = curRoute()[0], u = unreadCount();
+  const L = (r, i, t, b) => `<a href="#/${r}" class="${p === r ? "on" : ""}">${I(i)}${t}${b ? `<span class="badge">${b}</span>` : ""}</a>`;
+  n.innerHTML = `<nav class="nav">${L("home", "house", "الرئيسية")}${L("khalwa", "candle", "خلوتي")}${L("search", "magnifying_glass_tilted_left", "البحث")}${L("chats", "speech_balloon", "الرسائل", u)}${L("profile", "bust_in_silhouette", "بروفايلي")}</nav>`;
+}
+
+function shell(title, body, back = true){
+  $("#app").innerHTML = `${DEMO ? '<div class="demo">نسخة تجريبية — البيانات محفوظة على الجهاز ده بس</div>' : ""}
+  <div class="top">${back ? `<button class="back" onclick="history.length>1?history.back():go('home')">→</button>` : ""}<h1>${title}</h1></div>
+  <div class="wrap" id="pg">${body}${footer()}</div>`;
+  hydrate($("#app"));
+}
+const avatar = (u, cls = "") => u && u.photo ? `<img class="av ${cls}" data-f="${h(u.photo)}" alt="">` : `<span class="av ${cls}">${I("bust_in_silhouette", cls === "big" ? "xl" : "")}</span>`;
+
+/* ================= auth ================= */
+function renderAuth(mode = "login"){
+  document.body.classList.add("noNav"); $("#nav").innerHTML = "";
+  const reg = mode === "reg";
+  $("#app").innerHTML = `<div class="auth">
+    <div class="logo">${I("dove", "xl")}${I("latin_cross", "lg")}<h1>جنود المسيح</h1><small>S.O.C</small><div style="color:#cdd6ee;font-size:13px;margin-top:4px">«فاشترك أنت في احتمال المشقات كجندي صالح ليسوع المسيح»</div></div>
+    <div class="card">
+      <div class="tabs"><button class="${reg ? "" : "on"}" onclick="renderAuth('login')">تسجيل الدخول</button><button class="${reg ? "on" : ""}" onclick="renderAuth('reg')">حساب جديد</button></div>
+      ${reg ? `<label>الاسم بالكامل</label><input id="aName" placeholder="مثال: مينا عادل">` : ""}
+      <label>رقم التليفون (أو الإيميل)</label><input id="aPhone" type="text" autocomplete="username" placeholder="01xxxxxxxxx" dir="ltr">
+      <label>كلمة السر</label><input id="aPass" type="password" placeholder="6 حروف أو أرقام على الأقل" dir="ltr">
+      ${reg ? `<label>تأكيد كلمة السر</label><input id="aPass2" type="password" dir="ltr">` : ""}
+      <button class="btn block navy" id="aBtn">${reg ? "إنشاء الحساب" : "دخول"}</button>
+      ${DEMO ? `<p class="muted" style="text-align:center">نسخة تجريبية: سجّل بأي رقم وكلمة سر وجرّب</p>` : ""}
+    </div>${footer()}</div>`;
+  $("#aBtn").onclick = async () => {
+    const raw = $("#aPhone").value.trim(), isMail = raw.includes("@"), pass = $("#aPass").value;
+    const phone = isMail ? raw.toLowerCase() : digits(raw);
+    if (isMail ? !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(phone) : phone.length < 8) return toast(isMail ? "اكتب إيميل صحيح" : "اكتب رقم تليفون صحيح");
+    if (pass.length < 6) return toast("كلمة السر لازم 6 على الأقل");
+    const btn = $("#aBtn"); busy(btn, true);
+    try {
+      if (reg){
+        const name = $("#aName").value.trim(); if (!name){ busy(btn, false); return toast("اكتب اسمك"); }
+        if (pass !== $("#aPass2").value){ busy(btn, false); return toast("كلمتين السر مش زي بعض"); }
+        window.__newName = name;
+        const uid = await B.auth.signUp(phone, pass);
+        await B.set("users", uid, { name, nameN: norm(name), phone: isMail ? "" : phone, email: isMail ? phone : "", talents: [], custom: [], address: "", church: "", bio: "", photo: "", createdAt: Date.now() });
+        ME = await B.get("users", uid); route();
+      } else await B.auth.signIn(phone, pass);
+    } catch (e){ busy(btn, false); toast(authErr(e)); }
+  };
+}
+
+/* ================= home ================= */
+function pageHome(){
+  const today = ymd(new Date());
+  const T = (r, i, t, b) => `<div class="tile" onclick="go('${r}')">${b ? `<span class="badge">${b}</span>` : ""}${I(i, "lg")}<b>${t}</b></div>`;
+  shell(`<span class="brand">${I("dove")} جنود المسيح <small>S.O.C</small></span>`, `
+    <div class="hero" onclick="go('profile')">${avatar(ME, "")}<div class="grow"><h2>سلام ونعمة يا ${h((ME.name || "").split(" ")[0])}</h2>
+      <div class="muted">${(ME.talents || []).map(tName).concat(ME.custom || []).join(" • ") || "اضغط وكمّل بروفايلك واختار مواهبك"}</div></div></div>
+    <div id="nextSvc"></div>
+    <div class="tiles">
+      ${T("profile", "bust_in_silhouette", "بروفايلي")}
+      ${T("services", "clipboard", "خدماتي")}
+      ${T("calendar", "spiral_calendar", "التقويم")}
+      ${T("topics", "memo", "موضوعات")}
+      ${T("khalwa", "candle", "خلوتي")}
+      ${T("library", "books", "المكتبة")}
+      ${T("search", "magnifying_glass_tilted_left", "ابحث عن خادم")}
+      ${T("chats", "speech_balloon", "الرسائل", unreadCount())}
+      <div class="tile" onclick="go('news')"><span class="badge" id="annBadge">${unseenAnns().length || ""}</span>${I("megaphone", "lg")}<b>الإعلانات</b></div>
+      ${isAdmin() ? `<div class="tile" style="grid-column:span 2;display:flex;align-items:center;justify-content:center;gap:10px" onclick="go('admin')">${I("shield", "lg")}<b style="margin:0">الإدارة — ابعت إعلان أو دعوة للكل</b></div>` : ""}
+    </div>`, false);
+  B.where("services", "ownerId", "==", B.uid).then(list => {
+    const due = dueReminders(list);
+    const up = list.filter(s => s.date >= today).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
+    const el = $("#nextSvc"); if (!el || !up) return;
+    if (due.length){ el.innerHTML = due.map(s => `<div class="card" onclick="go('services')" style="cursor:pointer;background:linear-gradient(135deg,#fff3cd,#fff);border:1.5px solid var(--gold)"><div class="row">${I("bell", "lg")}<div class="grow"><b>تذكير: عندك خدمة ${h(s.title || "")}</b><div class="muted">${fmtDate(s.date)} الساعة ${fmtTime(s.time)} — ${h(s.church)}${s.meeting ? " • " + h(s.meeting) : ""}</div></div></div></div>`).join(""); hydrate(el); return; }
+    el.innerHTML = `<div class="card" onclick="go('services')" style="cursor:pointer;border-inline-start:4px solid var(--gold)"><div class="row">${I("alarm_clock", "lg")}<div class="grow"><div class="muted">خدمتك الجاية</div><b>${h(up.title || up.meeting || "خدمة")}</b><div class="muted">${fmtDate(up.date)} ${fmtTime(up.time)} — ${h(up.church)}</div></div></div></div>`;
+  });
+}
+
+/* ================= profile ================= */
+function pageProfile(){
+  const P = { ...ME, talents: [...(ME.talents || [])], custom: [...(ME.custom || [])] };
+  const firstTime = !ME.name;
+  shell("بروفايلي", `
+    <div class="card" style="text-align:center">
+      <div id="avBox"></div>
+      <input type="file" id="phFile" accept="image/*" hidden>
+    </div>
+    <div class="card">
+      <label>الاسم</label><input id="pName" value="${h(P.name)}">
+      <label>رقم التليفون (رقم الواتساب)</label><input id="pPhone" type="tel" dir="ltr" value="${h(P.phone || (String(B.phone).includes("@") ? "" : B.phone))}">
+      <label>مكان الإقامة (العنوان)</label><input id="pAddr" value="${h(P.address)}" placeholder="المدينة - المنطقة - الشارع">
+      <label>الكنيسة اللي بتخدم فيها</label><input id="pChurch" value="${h(P.church)}">
+      <label>نبذة عنك</label><textarea id="pBio" placeholder="اكتب نبذة قصيرة عن خدمتك">${h(P.bio)}</textarea>
+    </div>
+    <div class="card"><h3>${I("sparkles")} خدمتي ومواهبي <span class="muted">(تقدر تختار أكتر من واحدة)</span></h3>
+      <div class="chips" id="tal"></div>
+      <div class="row" style="margin-top:10px"><input id="newTal" placeholder="موهبة تانية؟ مثال: عازف كمان"><button class="btn sm" id="addTal">إضافة</button></div>
+    </div>
+    <button class="btn block navy" id="pSave">${I("check_mark_button", "sm")} حفظ البروفايل</button>
+    ${firstTime ? "" : `<button class="btn block" onclick="shareProfile()">${I("outbox_tray", "sm")} شارك لينك بروفايلي (واتساب)</button>
+    <button class="btn block ghost" onclick="go('user/${B.uid}')">${I("bust_in_silhouette", "sm")} شوف بروفايلي زي ما الناس شايفاه</button>
+    <button class="btn block red" id="logout">${I("door", "sm")} تسجيل الخروج</button>`}`, !firstTime);
+  const drawTal = () => {
+    $("#tal").innerHTML = TALENTS.map(t => `<span class="chip ${P.talents.includes(t.k) ? "on" : ""}" data-k="${t.k}">${I(t.i, "sm")} ${t.n}</span>`).join("") +
+      P.custom.map((c, i) => `<span class="chip on">${I("musical_notes", "sm")} ${h(c)} <span class="x" data-del="${i}">✕</span></span>`).join("");
+    $("#tal").querySelectorAll("[data-k]").forEach(c => c.onclick = () => { const k = c.dataset.k; P.talents = P.talents.includes(k) ? P.talents.filter(x => x !== k) : [...P.talents, k]; drawTal(); });
+    $("#tal").querySelectorAll("[data-del]").forEach(c => c.onclick = e => { e.stopPropagation(); P.custom.splice(+c.dataset.del, 1); drawTal(); });
+  };
+  drawTal();
+  $("#addTal").onclick = () => { const v = $("#newTal").value.trim(); if (!v) return; if (!P.custom.includes(v)) P.custom.push(v); $("#newTal").value = ""; drawTal(); };
+  const drawPhoto = () => {
+    $("#avBox").innerHTML = `${avatar(ME, "big")}<div class="row" style="justify-content:center;margin-top:10px">
+      <button class="btn sm navy" id="phAdd">${I("camera", "sm")} ${ME.photo ? "تغيير الصورة" : "إضافة صورة"}</button>
+      ${ME.photo ? `<button class="btn sm red" id="phDel">${I("wastebasket", "sm")} حذف الصورة</button>` : ""}</div>`;
+    hydrate($("#avBox"));
+    $("#phAdd").onclick = () => $("#phFile").click();
+    if ($("#phDel")) $("#phDel").onclick = async () => { if (!(await confirmBox("تحذف صورتك؟"))) return; await B.set("users", B.uid, { photo: "" }); ME.photo = ""; toast("تم حذف الصورة"); drawPhoto(); };
+  };
+  drawPhoto();
+  $("#phFile").onchange = async e => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    const btn = $("#phAdd"); busy(btn, true);
+    try { const url = await B.upload(await compressImage(f, 600)); await B.set("users", B.uid, { photo: url }); ME.photo = url; toast("تم حفظ الصورة ✓"); drawPhoto(); }
+    catch (er){ busy(btn, false); toast(er.message || "فشل رفع الصورة"); }
+  };
+  if ($("#logout")) $("#logout").onclick = async () => { if (await confirmBox("تسجيل الخروج؟")) B.auth.signOut(); };
+  $("#pSave").onclick = async () => {
+    const name = $("#pName").value.trim(); if (!name) return toast("اكتب اسمك");
+    const o = { name, nameN: norm(name), phone: digits($("#pPhone").value), address: $("#pAddr").value.trim(), church: $("#pChurch").value.trim(), bio: $("#pBio").value.trim(), talents: P.talents, custom: P.custom, updatedAt: Date.now() };
+    if (!ME.createdAt) o.createdAt = Date.now();
+    const btn = $("#pSave"); busy(btn, true);
+    try { await B.set("users", B.uid, o); Object.assign(ME, o); toast("تم الحفظ ✓"); go("home"); } catch (e){ busy(btn, false); toast("فشل الحفظ"); }
+  };
+}
+
+/* ================= other user ================= */
+/* ================= public profile (يشوفه أي حد) ================= */
+const waNum = p => { const d = digits(p); return d.startsWith("00") ? d.slice(2) : d.startsWith("0") ? "2" + d : d; };
+function profileLink(uid){
+  let base = (CFG.publicUrl || "").trim();
+  if (!base && /^https?:/.test(location.protocol) && !/localhost|127\.0\.0\.1/.test(location.hostname)) base = location.origin + location.pathname;
+  if (!base) return "";
+  return base.replace(/#.*$/, "").replace(/\/?$/, "/") .replace(/index\.html\/$/, "") + "#/p/" + uid;
+}
+function profileCardHtml(u){
+  const ph = digits(u.phone), msg = encodeURIComponent("سلام ونعمة يا " + (u.name || "") + "، شفت بروفايلك على برنامج جنود المسيح S.O.C");
+  const tal = [...(u.talents || []).map(k => `<span class="chip">${I(tIcon(k))} ${tName(k)}</span>`), ...(u.custom || []).map(c => `<span class="chip">${I("musical_notes")} ${h(c)}</span>`)].join("");
+  return `
+  <div class="card" style="text-align:center;padding-top:20px;background:linear-gradient(180deg,#fff,#fbf7ee)">${avatar(u, "big")}
+    <h2 style="margin:10px 0 2px">${h(u.name)}</h2>
+    ${u.church ? `<div class="muted">${I("church", "sm")} ${h(u.church)}</div>` : ""}
+  </div>
+  <div class="card"><h3>${I("sparkles")} موهبتي وخدمتي</h3><div class="chips" style="font-size:15px">${tal || '<span class="muted">لسه مختارش مواهب</span>'}</div></div>
+  <div class="card">
+    <h3>${I("round_pushpin")} العنوان</h3><div style="font-weight:600">${h(u.address || "—")}</div>
+    <h3 style="margin-top:14px">${I("telephone_receiver")} رقم التليفون</h3><div dir="ltr" style="text-align:right;font-weight:800;font-size:18px">${h(u.phone || "—")}</div>
+    ${u.bio ? `<h3 style="margin-top:14px">${I("spiral_notepad")} نبذة</h3><div style="white-space:pre-wrap;line-height:1.8">${h(u.bio)}</div>` : ""}
+  </div>
+  ${ph ? `<a class="btn block" style="background:linear-gradient(135deg,#25d366,#128c4a);color:#fff;font-size:17px;padding:15px;text-decoration:none;box-shadow:0 6px 14px rgba(18,140,74,.3)" href="https://wa.me/${waNum(ph)}?text=${msg}" target="_blank" rel="noopener" onclick="if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()){openExt(this.href);return false}">${I("mobile_phone")} ابعتلي واتساب</a>
+  <a class="btn block ghost" style="margin-top:8px;text-decoration:none" href="tel:${ph}">${I("telephone_receiver", "sm")} اتصال ${h(u.phone)}</a>` : ""}`;
+}
+async function pageUser(id){
+  shell("بروفايل خادم", `<div class="empty"><span class="spin"></span></div>`);
+  const u = await B.get("users", id);
+  if (!u || u.blocked){ $("#pg").innerHTML = `<div class="empty">الخادم ده مش موجود</div>` + footer(); return; }
+  const mine = id === B.uid;
+  $("#pg").innerHTML = profileCardHtml(u) + (mine ? `
+    <button class="btn block navy" onclick="shareProfile()">${I("outbox_tray", "sm")} شارك لينك بروفايلي</button>
+    <button class="btn block ghost" onclick="go('profile')">${I("pencil", "sm")} تعديل بروفايلي</button>` : `
+    <div class="row wrap2" style="margin-top:8px">
+      <button class="btn navy grow" onclick="openChatWith('${id}')">${I("speech_balloon", "sm")} مراسلة في البرنامج</button>
+      <button class="btn grow" onclick="inviteModal('${id}')">${I("handshake", "sm")} دعوة لخدمة</button>
+    </div>`)
+    + (isAdmin() && !mine ? `<button class="btn block red" onclick="adminBlock('${id}')">${I("shield", "sm")} إيقاف الحساب (أدمن)</button>` : "")
+    + footer();
+  hydrate($("#pg"));
+}
+// صفحة البروفايل العامة: بتفتح من اللينك لأي حد حتى لو مش متسجل
+async function pagePublic(id){
+  document.body.classList.add("noNav"); $("#nav").innerHTML = "";
+  $("#app").innerHTML = `<div class="top"><h1><span class="brand">${I("dove")} جنود المسيح <small>S.O.C</small></span></h1></div><div class="wrap" id="pg"><div class="empty"><span class="spin"></span></div></div>`;
+  hydrate($("#app"));
+  let u = null; try { u = await B.get("users", id); } catch (e) {}
+  if (!u || u.blocked){ $("#pg").innerHTML = `<div class="empty">${I("bust_in_silhouette", "xl")}<p>البروفايل ده مش موجود</p></div>` + footer(); return; }
+  $("#pg").innerHTML = profileCardHtml(u) + (B.uid
+    ? `<button class="btn block navy" onclick="go('user/${id}')">${I("house", "sm")} افتحه جوه البرنامج</button>`
+    : `<div class="card" style="text-align:center;margin-top:12px">${I("busts_in_silhouette", "lg")}<p style="margin:6px 0">انت خادم؟ سجّل في <b>جنود المسيح</b> وخلّي الناس توصلك</p><button class="btn navy" onclick="history.replaceState(null,'',location.pathname);renderAuth('reg')">إنشاء حساب</button></div>`) + footer();
+  hydrate($("#pg"));
+}
+async function shareProfile(){
+  const link = profileLink(B.uid);
+  if (!link){ return modal(`<h2>${I("outbox_tray")} شارك بروفايلك</h2><p>لينك المشاركة هيشتغل بعد ما ترفع البرنامج على الإنترنت (GitHub Pages) وتحط عنوانه في <b>publicUrl</b> في ملف config.js.</p><button class="btn block ghost" onclick="closeModal()">تمام</button>`); }
+  const text = `بروفايلي على جنود المسيح S.O.C — ${ME.name}\n${link}`;
+  modal(`<h2>${I("outbox_tray")} شارك بروفايلك</h2><p class="muted">أي حد يفتح اللينك ده يشوف موهبتك وعنوانك ورقمك ويقدر يبعتلك واتساب، حتى لو مش متسجل.</p>
+    <input readonly value="${h(link)}" dir="ltr" onclick="this.select()">
+    <a class="btn block" style="background:#25d366;color:#fff;text-decoration:none" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener" onclick="if(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()){openExt(this.href);return false}">${I("mobile_phone", "sm")} ابعته على واتساب</a>
+    <div class="row" style="margin-top:8px"><button class="btn ghost grow" id="cpL">${I("paperclip", "sm")} نسخ اللينك</button>${navigator.share ? `<button class="btn ghost grow" id="shL">${I("outbox_tray", "sm")} مشاركة</button>` : ""}</div>`);
+  $("#cpL").onclick = async () => { try { await navigator.clipboard.writeText(link); toast("اتنسخ اللينك ✓"); } catch (e){ toast("اضغط على اللينك وانسخه"); } };
+  if ($("#shL")) $("#shL").onclick = () => navigator.share({ title: "بروفايلي - جنود المسيح", text, url: link }).catch(() => {});
+}
+
+/* ================= تنبيهات الخدمات ================= */
+const REM_OPTS = [[0, "بدون تنبيه"], [30, "قبلها بنص ساعة"], [60, "قبلها بساعة"], [180, "قبلها بـ 3 ساعات"], [720, "قبلها بـ 12 ساعة"], [1440, "قبلها بيوم"], [2880, "قبلها بيومين"], [10080, "قبلها بأسبوع"], [-1, "أحدد أنا الميعاد…"]];
+const svcStart = s => new Date(`${s.date}T${s.time || "00:00"}`);
+function remindTime(s){
+  if (s.remindAt) return new Date(s.remindAt);
+  const m = s.remindMin === undefined ? 1440 : +s.remindMin; if (!m) return null;
+  return new Date(svcStart(s).getTime() - m * 60000);
+}
+function remindLabel(s){
+  if (s.remindAt){ const d = new Date(s.remindAt); return `تنبيه يوم ${fmtDate(ymd(d))} ${fmtTime(pad(d.getHours()) + ":" + pad(d.getMinutes()))}`; }
+  const m = s.remindMin === undefined ? 1440 : +s.remindMin; const o = REM_OPTS.find(x => x[0] === m);
+  return m ? "تنبيه " + (o ? o[1] : `قبلها بـ ${m} دقيقة`) : "";
+}
+const isNative = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+const LN = () => isNative() && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications;
+const notifId = id => { let x = 7; for (const c of String(id)) x = (x * 31 + c.charCodeAt(0)) | 0; return Math.abs(x) % 2000000000 + 1; };
+let lnReady = false;
+async function setupNotifications(){
+  const L = LN(); if (!L || lnReady) return !!L; lnReady = true;
+  try {
+    let p = await L.checkPermissions(); if (p.display !== "granted") p = await L.requestPermissions();
+    try { await L.createChannel({ id: "services", name: "تنبيهات الخدمات", importance: 5, sound: "default", vibration: true, visibility: 1 }); } catch (e) {}
+    L.addListener("localNotificationActionPerformed", () => go("services"));
+  } catch (e) {}
+  return true;
+}
+async function syncReminders(){
+  if (!B.uid) return;
+  try {
+    const list = await B.where("services", "ownerId", "==", B.uid);
+    const L = LN();
+    if (L){
+      await setupNotifications();
+      const pend = await L.getPending();
+      const old = (pend.notifications || []).filter(n => n.extra && n.extra.kind === "svc");
+      if (old.length) await L.cancel({ notifications: old.map(n => ({ id: n.id })) });
+      const now = Date.now();
+      const items = list.map(s => ({ s, t: remindTime(s) })).filter(x => x.t && x.t.getTime() > now + 5000 && svcStart(x.s).getTime() > now);
+      if (items.length) await L.schedule({ notifications: items.map(({ s, t }) => ({
+        id: notifId(s.id), channelId: "services", title: "⏰ تذكير بخدمة: " + (s.title || s.meeting || "خدمة"),
+        body: `${fmtDate(s.date)} الساعة ${fmtTime(s.time)}\n${s.church || ""}${s.meeting ? " • " + s.meeting : ""}${s.place ? " — " + s.place : ""}`,
+        largeBody: `${fmtDate(s.date)} الساعة ${fmtTime(s.time)}\n${s.church || ""}${s.meeting ? " • " + s.meeting : ""}${s.place ? "\n" + s.place : ""}`,
+        schedule: { at: t, allowWhileIdle: true }, extra: { kind: "svc", sid: s.id }
+      })) });
+    }
+    return list;
+  } catch (e){ console.warn("reminders", e); }
+}
+// تنبيه جوه البرنامج (للنسخة الويب أو لو التنبيه فات)
+function dueReminders(list){
+  const now = Date.now();
+  return (list || []).filter(s => { const t = remindTime(s); return t && t.getTime() <= now && svcStart(s).getTime() > now; }).sort((a, b) => svcStart(a) - svcStart(b));
+}
+
+/* ================= services ================= */
+function svcForm(s = {}){
+  return `<label>نوع الخدمة</label><input id="sTitle" value="${h(s.title)}" placeholder="مثال: عظة / قيادة تسبيح / عزف">
+    <div class="row"><div class="grow"><label>التاريخ</label><input id="sDate" type="date" value="${h(s.date || ymd(new Date()))}"></div><div class="grow"><label>الوقت</label><input id="sTime" type="time" value="${h(s.time || "19:00")}"></div></div>
+    <label>اسم الكنيسة</label><input id="sChurch" value="${h(s.church)}">
+    <label>اسم الاجتماع</label><input id="sMeeting" value="${h(s.meeting)}" placeholder="مثال: اجتماع الشباب">
+    <label>مكان الكنيسة</label><input id="sPlace" value="${h(s.place)}" placeholder="العنوان">
+    <label>ملاحظات</label><textarea id="sNotes" style="min-height:60px">${h(s.notes)}</textarea>
+    <label>${I("alarm_clock", "sm")} البرنامج ينبهني امتى؟</label>
+    <select id="sRem">${REM_OPTS.map(([v, n]) => `<option value="${v}" ${(s.remindAt ? -1 : (s.remindMin === undefined ? 1440 : +s.remindMin)) === v ? "selected" : ""}>${n}</option>`).join("")}</select>
+    <div id="sRemBox" style="${s.remindAt ? "" : "display:none"}"><label>ميعاد التنبيه</label><input id="sRemAt" type="datetime-local" value="${h(s.remindAt || "")}"></div>`;
+}
+document.addEventListener("change", e => { if (e.target && e.target.id === "sRem"){ const b = $("#sRemBox"); if (b) b.style.display = e.target.value === "-1" ? "" : "none"; } });
+const readSvc = () => {
+  const o = { title: $("#sTitle").value.trim(), date: $("#sDate").value, time: $("#sTime").value, church: $("#sChurch").value.trim(), meeting: $("#sMeeting").value.trim(), place: $("#sPlace").value.trim(), notes: $("#sNotes").value.trim() };
+  const r = $("#sRem") ? +$("#sRem").value : 1440;
+  if (r === -1){ o.remindAt = ($("#sRemAt").value || ""); o.remindMin = 0; } else { o.remindMin = r; o.remindAt = ""; }
+  return o;
+};
+
+function svcCard(s){
+  return `<div class="card" style="border-inline-start:4px solid ${s.date >= ymd(new Date()) ? "var(--gold)" : "#cfd6e4"}">
+    <div class="row"><div class="grow"><b>${h(s.title || "خدمة")}</b>${s.invitedBy ? ` <span class="tag">دعوة من ${h(s.invitedBy)}</span>` : ""}</div>
+      <button class="btn sm ghost" onclick="editSvc('${s.id}')">${I("pencil", "sm")}</button><button class="btn sm red" onclick="delSvc('${s.id}')">${I("wastebasket", "sm")}</button></div>
+    <div class="muted" style="margin-top:6px">${I("spiral_calendar", "sm")} ${fmtDate(s.date)} — ${fmtTime(s.time)}</div>
+    <div class="muted">${I("church", "sm")} ${h(s.church)}${s.meeting ? " • " + h(s.meeting) : ""}</div>
+    ${s.place ? `<div class="muted">${I("round_pushpin", "sm")} ${h(s.place)}</div>` : ""}
+    ${s.date >= ymd(new Date()) && remindLabel(s) ? `<div class="muted">${I("alarm_clock", "sm")} ${remindLabel(s)}</div>` : ""}
+    ${s.notes ? `<div style="margin-top:6px;white-space:pre-wrap">${h(s.notes)}</div>` : ""}</div>`;
+}
+let SVCS = [];
+async function pageServices(){
+  shell("خدماتي", `<button class="btn block navy" style="margin:0 0 12px" onclick="editSvc()">${I("plus", "sm")} سجّل خدمة جديدة</button><div id="sl"><div class="empty"><span class="spin"></span></div></div>`);
+  SVCS = await B.where("services", "ownerId", "==", B.uid);
+  const t = ymd(new Date());
+  const up = SVCS.filter(s => s.date >= t).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+  const past = SVCS.filter(s => s.date < t).sort((a, b) => (b.date + b.time).localeCompare(a.date + a.time));
+  $("#sl").innerHTML = SVCS.length ? `<h3>${I("alarm_clock", "sm")} الخدمات الجاية (${up.length})</h3>${up.map(svcCard).join("") || '<div class="muted">مفيش خدمات جاية</div>'}
+    <h3 style="margin-top:18px">${I("hourglass_done", "sm")} خدمات سابقة (${past.length})</h3>${past.map(svcCard).join("")}`
+    : `<div class="empty">${I("clipboard", "xl")}<p>لسه مسجلتش خدمات. اضغط "سجّل خدمة جديدة"</p></div>`;
+  hydrate($("#sl"));
+}
+function editSvc(id, preset){
+  const s = id ? SVCS.find(x => x.id === id) : (preset || {});
+  modal(`<h2>${I("clipboard")} ${id ? "تعديل الخدمة" : "خدمة جديدة"}</h2>${svcForm(s)}<button class="btn block navy" id="sSave">حفظ</button>`);
+  $("#sSave").onclick = async () => {
+    const o = readSvc(); if (!o.date) return toast("حدد التاريخ"); if (!o.church && !o.meeting && !o.title) return toast("اكتب الكنيسة أو اسم الاجتماع");
+    busy($("#sSave"), true);
+    if (o.remindAt === "" && +$("#sRem").value === -1) { busy($("#sSave"), false); return toast("حدد ميعاد التنبيه"); }
+    if (id) await B.set("services", id, o); else await B.add("services", { ...o, ownerId: B.uid, createdAt: Date.now() });
+    syncReminders();
+    closeModal(); toast("تم الحفظ ✓"); route();
+  };
+}
+async function delSvc(id){ if (!(await confirmBox("تحذف الخدمة دي؟"))) return; await B.del("services", id); syncReminders(); toast("تم الحذف"); route(); }
+
+/* ================= calendar ================= */
+let calM = null, calSel = null;
+async function pageCalendar(){
+  const now = new Date(); if (!calM) calM = new Date(now.getFullYear(), now.getMonth(), 1); if (!calSel) calSel = ymd(now);
+  shell("التقويم", `<div class="card"><div class="row"><button class="btn sm ghost" id="cPrev">→</button><h3 class="grow" style="text-align:center;margin:0">${MONTHS[calM.getMonth()]} ${calM.getFullYear()}</h3><button class="btn sm ghost" id="cNext">←</button></div>
+    <div class="cal" id="cal" style="margin-top:10px"></div>
+    <div class="row muted" style="margin-top:8px;gap:14px;justify-content:center"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold2)"></span> خدمة</span><span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6b8de3"></span> خلوة</span></div></div>
+    <div id="dayList"></div>`);
+  $("#cPrev").onclick = () => { calM = new Date(calM.getFullYear(), calM.getMonth() - 1, 1); pageCalendar(); };
+  $("#cNext").onclick = () => { calM = new Date(calM.getFullYear(), calM.getMonth() + 1, 1); pageCalendar(); };
+  const [svcs, devs] = await Promise.all([B.where("services", "ownerId", "==", B.uid), B.where("devotions", "ownerId", "==", B.uid)]);
+  SVCS = svcs;
+  const byDay = {}; svcs.forEach(s => (byDay[s.date] = byDay[s.date] || []).push(s));
+  const devDay = {}; devs.forEach(d => devDay[d.date] = (devDay[d.date] || 0) + 1);
+  const first = calM.getDay(), off = (first + 1) % 7; // week starts Saturday
+  const n = new Date(calM.getFullYear(), calM.getMonth() + 1, 0).getDate(), today = ymd(now);
+  let html = ["سبت","أحد","اثنين","ثلاثاء","أربعاء","خميس","جمعة"].map(d => `<div class="h">${d}</div>`).join("");
+  for (let i = 0; i < off; i++) html += `<div class="d o"></div>`;
+  for (let d = 1; d <= n; d++){
+    const k = `${calM.getFullYear()}-${pad(calM.getMonth() + 1)}-${pad(d)}`;
+    html += `<div class="d ${k === today ? "today" : ""} ${k === calSel ? "sel" : ""}" data-k="${k}">${d}<div class="dots">${(byDay[k] || []).slice(0, 3).map(() => '<span class="dot"></span>').join("")}${devDay[k] ? '<span class="dot k"></span>' : ""}</div></div>`;
+  }
+  $("#cal").innerHTML = html;
+  $("#cal").querySelectorAll("[data-k]").forEach(c => c.onclick = () => { calSel = c.dataset.k; pageCalendar(); });
+  const list = (byDay[calSel] || []).sort((a, b) => a.time.localeCompare(b.time));
+  $("#dayList").innerHTML = `<h3>${fmtDate(calSel)}</h3>${list.map(svcCard).join("") || `<div class="card muted">مكنتش في خدمة اليوم ده</div>`}
+    ${devDay[calSel] ? `<div class="card" onclick="go('khalwa')" style="cursor:pointer">${I("candle")} أخدت خلوتك اليوم ده ✓</div>` : ""}
+    <button class="btn block ghost" onclick="editSvc(null,{date:'${calSel}'})">${I("plus", "sm")} سجّل خدمة في اليوم ده</button>`;
+  hydrate($("#dayList"));
+}
+
+/* ================= topics ================= */
+const ext = n => (String(n).split(".").pop() || "").toLowerCase();
+const fileIcon = n => { const e = ext(n); return ["ppt","pptx"].includes(e) ? "bar_chart" : ["xls","xlsx","csv"].includes(e) ? "card_file_box" : e === "pdf" ? "page_facing_up" : ["doc","docx"].includes(e) ? "memo" : ["jpg","jpeg","png","gif","webp"].includes(e) ? "framed_picture" : "file_folder"; };
+const fileRow = (f, del) => `<div class="file" ${del === undefined ? `onclick="openFile('${h(f.url)}',${f.img ? 1 : 0})"` : ""}>${I(f.img ? "framed_picture" : fileIcon(f.name))}<span class="n">${h(f.name)}</span>${del !== undefined ? `<span class="x" style="color:var(--red);font-weight:800;cursor:pointer" data-rm="${del}">✕</span>` : I("outbox_tray", "sm")}</div>`;
+
+async function uploadMany(files, statusEl){
+  const out = [];
+  for (let i = 0; i < files.length; i++){
+    let f = files[i]; const img = f.type.startsWith("image/");
+    if (statusEl) statusEl.innerHTML = `<span class="spin"></span> بيرفع ${i + 1} من ${files.length}: ${h(f.name)}`;
+    if (img) f = await compressImage(f);
+    const url = await B.upload(f);
+    out.push({ url, name: files[i].name, img });
+  }
+  if (statusEl) statusEl.innerHTML = "";
+  return out;
+}
+
+let TOPICS = [];
+async function pageTopics(){
+  shell("موضوعاتي", `<button class="btn block navy" style="margin:0 0 12px" onclick="editTopic()">${I("plus", "sm")} موضوع جديد</button><input id="tq" placeholder="ابحث في موضوعاتك..." style="margin-bottom:12px"><div id="tl"><div class="empty"><span class="spin"></span></div></div>`);
+  TOPICS = (await B.where("topics", "ownerId", "==", B.uid)).sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
+  const draw = () => {
+    const q = norm($("#tq").value);
+    const l = TOPICS.filter(t => !q || norm(t.title + " " + t.body).includes(q));
+    $("#tl").innerHTML = l.map(t => `<div class="item" onclick="go('topic/${t.id}')">${I("memo", "lg")}<div class="grow"><div class="t">${h(t.title)}</div><div class="muted">${h((t.body || "").slice(0, 70))}</div><div class="muted">${(t.files || []).length ? I("paperclip", "sm") + " " + t.files.length + " مرفق" : ""}</div></div></div>`).join("")
+      || `<div class="empty">${I("memo", "xl")}<p>${TOPICS.length ? "مفيش نتائج" : "اكتب أول موضوع ليك (عظة، درس، فكرة...)"}</p></div>`;
+  };
+  $("#tq").oninput = draw; draw();
+}
+async function pageTopic(id){
+  shell("موضوع", `<div class="empty"><span class="spin"></span></div>`);
+  const t = await B.get("topics", id); if (!t || t.ownerId !== B.uid){ $("#pg").innerHTML = '<div class="empty">الموضوع مش موجود</div>' + footer(); return; }
+  TOPICS = [t];
+  const imgs = (t.files || []).filter(f => f.img), docs = (t.files || []).filter(f => !f.img);
+  $("#pg").innerHTML = `<div class="card"><h2 style="margin:0 0 4px">${h(t.title)}</h2><div class="muted">${fmtDate(ymd(new Date(t.createdAt)))}</div>
+    <div style="white-space:pre-wrap;line-height:1.9;margin-top:10px">${h(t.body)}</div></div>
+    ${imgs.length ? `<div class="card"><h3>${I("framed_picture", "sm")} الصور</h3><div class="gal">${imgs.map(f => `<img data-f="${h(f.url)}" onclick="openFile('${h(f.url)}',1)">`).join("")}</div></div>` : ""}
+    ${docs.length ? `<div class="card"><h3>${I("paperclip", "sm")} الملفات</h3>${docs.map(f => fileRow(f)).join("")}</div>` : ""}
+    <div class="row"><button class="btn navy grow" onclick="editTopic('${id}')">${I("pencil", "sm")} تعديل</button><button class="btn red grow" onclick="delTopic('${id}')">${I("wastebasket", "sm")} حذف</button></div>${footer()}`;
+  hydrate($("#pg"));
+}
+function editTopic(id){
+  const t = id ? TOPICS.find(x => x.id === id) : { title: "", body: "", files: [] };
+  let files = [...(t.files || [])];
+  modal(`<h2>${I("memo")} ${id ? "تعديل الموضوع" : "موضوع جديد"}</h2>
+    <label>اسم الموضوع</label><input id="tTitle" value="${h(t.title)}">
+    <label>الموضوع كامل</label><textarea id="tBody" style="min-height:200px">${h(t.body)}</textarea>
+    <label>مرفقات (بوربوينت، إكسيل، وورد، PDF، صور)</label>
+    <div id="tFiles"></div>
+    <div class="row" style="margin-top:8px"><button class="btn sm ghost grow" id="tAddF">${I("paperclip", "sm")} إضافة ملف</button><button class="btn sm ghost grow" id="tAddI">${I("camera", "sm")} إضافة صور</button></div>
+    <input type="file" id="tF" multiple hidden accept=".ppt,.pptx,.xls,.xlsx,.csv,.doc,.docx,.pdf,.txt,image/*">
+    <input type="file" id="tI" multiple hidden accept="image/*">
+    <div id="tSt" class="muted" style="margin-top:6px"></div>
+    <button class="btn block navy" id="tSave">حفظ الموضوع</button>`);
+  const draw = () => { $("#tFiles").innerHTML = files.map((f, i) => fileRow(f, i)).join(""); $("#tFiles").querySelectorAll("[data-rm]").forEach(x => x.onclick = () => { files.splice(+x.dataset.rm, 1); draw(); }); };
+  draw();
+  const pick = async e => { try { files.push(...await uploadMany([...e.target.files], $("#tSt"))); draw(); } catch (er){ $("#tSt").innerHTML = ""; toast(er.message || "فشل الرفع"); } e.target.value = ""; };
+  $("#tAddF").onclick = () => $("#tF").click(); $("#tAddI").onclick = () => $("#tI").click();
+  $("#tF").onchange = pick; $("#tI").onchange = pick;
+  $("#tSave").onclick = async () => {
+    const title = $("#tTitle").value.trim(); if (!title) return toast("اكتب اسم الموضوع");
+    busy($("#tSave"), true);
+    const o = { title, body: $("#tBody").value, files, updatedAt: Date.now() };
+    if (id) await B.set("topics", id, o); else { const nid = await B.add("topics", { ...o, ownerId: B.uid, createdAt: Date.now() }); closeModal(); toast("تم الحفظ ✓"); return go("topic/" + nid); }
+    closeModal(); toast("تم الحفظ ✓"); route();
+  };
+}
+async function delTopic(id){ if (!(await confirmBox("تحذف الموضوع؟"))) return; await B.del("topics", id); toast("تم الحذف"); go("topics"); }
+
+/* ================= khalwa (devotion) ================= */
+let BIBLE = null, kTab = "read", selVerse = null;
+async function loadBible(){ if (BIBLE) return BIBLE; const r = await fetch("bible.json"); BIBLE = await r.json(); return BIBLE; }
+function streakOf(devs){
+  const days = new Set(devs.map(d => d.date)); let s = 0; const d = new Date();
+  if (!days.has(ymd(d))) d.setDate(d.getDate() - 1);
+  while (days.has(ymd(d))){ s++; d.setDate(d.getDate() - 1); }
+  return s;
+}
+async function pageKhalwa(){
+  shell("خلوتي", `<div class="tabs"><button class="${kTab === "read" ? "on" : ""}" onclick="kTab='read';pageKhalwa()">${I("open_book", "sm")} اقرأ الكتاب المقدس</button><button class="${kTab === "log" ? "on" : ""}" onclick="kTab='log';pageKhalwa()">${I("scroll", "sm")} خلواتي</button></div><div id="kb"><div class="empty"><span class="spin"></span></div></div>`);
+  const devs = (await B.where("devotions", "ownerId", "==", B.uid)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const st = streakOf(devs), doneToday = devs.some(d => d.date === ymd(new Date()));
+  const head = `<div class="card streak">${I(doneToday ? "glowing_star" : "candle", "lg")}<div class="grow"><b>${st}</b> يوم متواصل<div class="muted">${doneToday ? "أخدت خلوتك النهارده، الرب يباركك ✓" : "لسه مأخدتش خلوة النهارده"}</div></div><div class="muted" style="text-align:center"><b style="font-size:18px;color:var(--navy)">${devs.length}</b><br>خلوة</div></div>`;
+  if (kTab === "log"){
+    $("#kb").innerHTML = head + (devs.map(d => `<div class="card"><div class="row"><b class="grow">${I("open_book", "sm")} ${h(d.ref || "")}</b><span class="muted">${fmtDate(d.date)}</span><button class="btn sm red" onclick="delDev('${d.id}')">${I("wastebasket", "sm")}</button></div>
+      ${d.golden ? `<div class="golden" style="margin-top:8px">${I("star", "sm")} ${h(d.golden)}</div>` : ""}
+      ${d.spoke ? `<p><b>الرب كلمني في:</b><br><span style="white-space:pre-wrap">${h(d.spoke)}</span></p>` : ""}
+      ${d.notes ? `<p class="muted" style="white-space:pre-wrap"><b>ملاحظات:</b> ${h(d.notes)}</p>` : ""}</div>`).join("") || `<div class="empty">${I("scroll", "xl")}<p>لسه مسجلتش خلوات</p></div>`);
+    hydrate($("#kb")); return;
+  }
+  let bible; try { bible = await loadBible(); } catch (e){ $("#kb").innerHTML = '<div class="empty">مقدرتش أفتح الكتاب المقدس</div>'; return; }
+  let pos = { b: 39, c: 0 }; try { pos = JSON.parse(localStorage.getItem("soc_pos")) || pos; } catch (e) {}
+  const books = bible.map((b, i) => `<option value="${i}" ${i === pos.b ? "selected" : ""}>${b.n}</option>`);
+  $("#kb").innerHTML = head + `<div class="card">
+    <div class="row"><select id="bk" class="grow"><optgroup label="العهد القديم">${books.slice(0, 39).join("")}</optgroup><optgroup label="العهد الجديد">${books.slice(39).join("")}</optgroup></select><select id="ch" style="width:96px"></select></div>
+    <div class="row" style="margin-top:8px"><button class="btn sm ghost" id="pv">→ السابق</button><div class="grow"></div><button class="btn sm ghost" id="nx">التالي ←</button></div>
+    <h3 id="chT" style="margin-top:12px;text-align:center"></h3><div class="verses" id="vs"></div>
+    <div class="muted" style="text-align:center;margin-top:6px">اضغط على أي آية تختارها كآية ذهبية ${I("star", "sm")}</div></div>
+    <div class="card"><h3>${I("pencil", "sm")} سجّل خلوتك</h3>
+      <label>${I("star", "sm")} الآية الذهبية</label><textarea id="dG" style="min-height:70px" placeholder="اختار آية من فوق أو اكتبها"></textarea>
+      <label>${I("dove", "sm")} الرب كلمني في...</label><textarea id="dS"></textarea>
+      <label>${I("spiral_notepad", "sm")} ملاحظات عن القراءة</label><textarea id="dN" style="min-height:70px"></textarea>
+      <button class="btn block navy" id="dSave">${I("check_mark_button", "sm")} حفظ الخلوة</button></div>`;
+  const fillCh = () => { const n = bible[pos.b].c.length; $("#ch").innerHTML = Array.from({ length: n }, (_, i) => `<option value="${i}" ${i === pos.c ? "selected" : ""}>أصحاح ${i + 1}</option>`).join(""); };
+  const show = () => {
+    localStorage.setItem("soc_pos", JSON.stringify(pos)); selVerse = null;
+    $("#chT").textContent = `${bible[pos.b].n} ${pos.c + 1}`;
+    $("#vs").innerHTML = bible[pos.b].c[pos.c].map((v, i) => `<span class="verse" data-i="${i}"><sup>${i + 1}</sup>${h(v)} </span>`).join("");
+    $("#vs").querySelectorAll(".verse").forEach(el => el.onclick = () => {
+      $("#vs").querySelectorAll(".sel").forEach(x => x.classList.remove("sel")); el.classList.add("sel");
+      const i = +el.dataset.i; selVerse = i;
+      $("#dG").value = `${bible[pos.b].c[pos.c][i]} (${bible[pos.b].n} ${pos.c + 1}: ${i + 1})`; toast("تم اختيار الآية الذهبية ⭐");
+    });
+  };
+  fillCh(); show();
+  $("#bk").onchange = () => { pos = { b: +$("#bk").value, c: 0 }; fillCh(); show(); };
+  $("#ch").onchange = () => { pos.c = +$("#ch").value; show(); window.scrollTo({ top: $("#chT").offsetTop - 80, behavior: "smooth" }); };
+  const step = d => { let { b, c } = pos; c += d; if (c < 0){ if (b === 0) return; b--; c = bible[b].c.length - 1; } else if (c >= bible[b].c.length){ if (b === 65) return; b++; c = 0; } pos = { b, c }; $("#bk").value = b; fillCh(); show(); window.scrollTo({ top: $("#chT").offsetTop - 80, behavior: "smooth" }); };
+  $("#pv").onclick = () => step(-1); $("#nx").onclick = () => step(1);
+  $("#dSave").onclick = async () => {
+    const o = { golden: $("#dG").value.trim(), spoke: $("#dS").value.trim(), notes: $("#dN").value.trim() };
+    if (!o.golden && !o.spoke) return toast("اكتب الآية الذهبية أو الرب كلمك في إيه");
+    busy($("#dSave"), true);
+    await B.add("devotions", { ...o, ref: `${bible[pos.b].n} ${pos.c + 1}`, date: ymd(new Date()), ownerId: B.uid, createdAt: Date.now() });
+    toast("تم حفظ خلوتك، الرب يباركك 🕯️"); kTab = "log"; pageKhalwa();
+  };
+}
+async function delDev(id){ if (!(await confirmBox("تحذف الخلوة دي؟"))) return; await B.del("devotions", id); pageKhalwa(); }
+
+/* ================= library ================= */
+let BOOKS = [], libCat = "";
+async function pageLibrary(){
+  shell("المكتبة", `<button class="btn block navy" style="margin:0 0 12px" onclick="editBook()">${I("inbox_tray", "sm")} ارفع كتاب</button>
+    <input id="lq" placeholder="ابحث باسم الكتاب أو المؤلف...">
+    <div class="chips" id="lc" style="margin:10px 0 12px"></div><div id="ll"><div class="empty"><span class="spin"></span></div></div>`);
+  BOOKS = (await B.all("books")).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const drawCats = () => { $("#lc").innerHTML = ["", ...BOOK_CATS].map(c => `<span class="chip ${libCat === c ? "on" : ""}" data-c="${c}">${c || "الكل"}</span>`).join(""); $("#lc").querySelectorAll(".chip").forEach(x => x.onclick = () => { libCat = x.dataset.c; drawCats(); draw(); }); };
+  const draw = () => {
+    const q = norm($("#lq").value);
+    const l = BOOKS.filter(b => (!libCat || b.category === libCat) && (!q || norm(`${b.title} ${b.author} ${b.desc} ${b.ownerName}`).includes(q)));
+    $("#ll").innerHTML = l.map(bookItem).join("") || `<div class="empty">${I("books", "xl")}<p>${BOOKS.length ? "مفيش كتب بالبحث ده" : "المكتبة فاضية، ارفع أول كتاب"}</p></div>`;
+    hydrate($("#ll"));
+  };
+  drawCats(); $("#lq").oninput = draw; draw();
+}
+const bookItem = b => `<div class="item" onclick="go('book/${b.id}')">${b.cover ? `<img class="cover" data-f="${h(b.cover)}">` : `<span class="cover">${I("open_book", "lg")}</span>`}
+  <div class="grow"><div class="t">${h(b.title)}</div><div class="muted">${h(b.author || "")}</div><span class="tag">${h(b.category || "أخرى")}</span><div class="muted">رفعه: ${h(b.ownerName || "")}${b.ownerId === B.uid ? " (أنت)" : ""}</div></div></div>`;
+async function pageBook(id){
+  shell("كتاب", `<div class="empty"><span class="spin"></span></div>`);
+  const b = await B.get("books", id); if (!b){ $("#pg").innerHTML = '<div class="empty">الكتاب اتحذف</div>' + footer(); return; }
+  BOOKS = [b];
+  const can = b.ownerId === B.uid || isAdmin();
+  const imgs = (b.files || []).filter(f => f.img), docs = (b.files || []).filter(f => !f.img);
+  $("#pg").innerHTML = `<div class="card"><div class="row" style="align-items:flex-start">${b.cover ? `<img class="cover" style="width:96px;height:130px" data-f="${h(b.cover)}" onclick="openFile('${h(b.cover)}',1)">` : `<span class="cover" style="width:96px;height:130px">${I("open_book", "xl")}</span>`}
+    <div class="grow"><h2 style="margin:0">${h(b.title)}</h2><div class="muted">${h(b.author || "")}</div><span class="tag">${h(b.category || "")}</span>
+    <div class="muted" style="margin-top:6px;cursor:pointer" onclick="go('user/${b.ownerId}')">${I("bust_in_silhouette", "sm")} رفعه: ${h(b.ownerName)}</div></div></div>
+    ${b.desc ? `<p style="white-space:pre-wrap;line-height:1.8">${h(b.desc)}</p>` : ""}</div>
+    ${docs.length ? `<div class="card"><h3>${I("page_facing_up", "sm")} ملفات الكتاب — اضغط للقراءة أو التحميل</h3>${docs.map(f => fileRow(f)).join("")}</div>` : ""}
+    ${imgs.length ? `<div class="card"><h3>${I("framed_picture", "sm")} صفحات الكتاب (${imgs.length})</h3><div class="gal">${imgs.map(f => `<img data-f="${h(f.url)}" onclick="openFile('${h(f.url)}',1)">`).join("")}</div></div>` : ""}
+    ${can ? `<div class="row"><button class="btn navy grow" onclick="editBook('${id}')">${I("pencil", "sm")} تعديل</button><button class="btn red grow" onclick="delBook('${id}')">${I("wastebasket", "sm")} حذف</button></div>` : ""}${footer()}`;
+  hydrate($("#pg"));
+}
+function editBook(id){
+  const b = id ? BOOKS.find(x => x.id === id) : { title: "", author: "", category: "روحي", desc: "", files: [], cover: "" };
+  let files = [...(b.files || [])], cover = b.cover || "";
+  modal(`<h2>${I("books")} ${id ? "تعديل الكتاب" : "رفع كتاب"}</h2>
+    <label>اسم الكتاب</label><input id="bT" value="${h(b.title)}">
+    <label>المؤلف</label><input id="bA" value="${h(b.author)}">
+    <label>التصنيف</label><select id="bC">${BOOK_CATS.map(c => `<option ${c === b.category ? "selected" : ""}>${c}</option>`).join("")}</select>
+    <label>نبذة عن الكتاب</label><textarea id="bD" style="min-height:70px">${h(b.desc)}</textarea>
+    <label>صورة الغلاف (اختياري)</label><div class="row"><div id="bCov"></div><button class="btn sm ghost" id="bCovB">${I("camera", "sm")} اختار غلاف</button></div>
+    <label>الكتاب نفسه: PDF أو أي ملف أو صور الصفحات</label><div id="bF"></div>
+    <div class="row" style="margin-top:8px"><button class="btn sm ghost grow" id="bAddF">${I("page_facing_up", "sm")} PDF / ملف</button><button class="btn sm ghost grow" id="bAddI">${I("framed_picture", "sm")} صور الصفحات</button></div>
+    <input type="file" id="bFi" multiple hidden><input type="file" id="bIi" multiple hidden accept="image/*"><input type="file" id="bCi" hidden accept="image/*">
+    <div id="bSt" class="muted" style="margin-top:6px"></div>
+    <button class="btn block navy" id="bSave">حفظ</button>`);
+  const draw = () => {
+    $("#bF").innerHTML = files.map((f, i) => fileRow(f, i)).join(""); $("#bF").querySelectorAll("[data-rm]").forEach(x => x.onclick = () => { files.splice(+x.dataset.rm, 1); draw(); });
+    $("#bCov").innerHTML = cover ? `<img class="cover" data-f="${h(cover)}">` : `<span class="cover">${I("open_book")}</span>`; hydrate($("#bCov"));
+  };
+  draw();
+  const pick = async e => { try { files.push(...await uploadMany([...e.target.files], $("#bSt"))); draw(); } catch (er){ $("#bSt").innerHTML = ""; toast(er.message || "فشل الرفع"); } e.target.value = ""; };
+  $("#bAddF").onclick = () => $("#bFi").click(); $("#bAddI").onclick = () => $("#bIi").click(); $("#bCovB").onclick = () => $("#bCi").click();
+  $("#bFi").onchange = pick; $("#bIi").onchange = pick;
+  $("#bCi").onchange = async e => { try { const [f] = await uploadMany([e.target.files[0]], $("#bSt")); cover = f.url; draw(); } catch (er){ toast(er.message || "فشل الرفع"); } };
+  $("#bSave").onclick = async () => {
+    const title = $("#bT").value.trim(); if (!title) return toast("اكتب اسم الكتاب");
+    if (!files.length && !(await confirmBox("مرفعتش ملف للكتاب، تحفظ كده؟"))) return;
+    busy($("#bSave"), true);
+    const o = { title, titleN: norm(title), author: $("#bA").value.trim(), category: $("#bC").value, desc: $("#bD").value.trim(), files, cover, updatedAt: Date.now() };
+    if (id) await B.set("books", id, o); else { const nid = await B.add("books", { ...o, ownerId: B.uid, ownerName: ME.name, createdAt: Date.now() }); closeModal(); toast("تم رفع الكتاب ✓"); return go("book/" + nid); }
+    closeModal(); toast("تم الحفظ ✓"); route();
+  };
+}
+async function delBook(id){ if (!(await confirmBox("تحذف الكتاب من المكتبة؟"))) return; await B.del("books", id); toast("تم الحذف"); go("library"); }
+
+/* ================= search ================= */
+let USERS = null, sTal = "";
+async function pageSearch(pre){
+  if (pre) sTal = pre;
+  shell("ابحث عن خادم", `<input id="q" placeholder="اكتب اسم، أو موهبة (مرنم، خادم كلمة...)، أو منطقة">
+    <div class="chips" id="sc" style="margin:10px 0 12px"></div><div id="sr"><div class="empty"><span class="spin"></span></div></div>`, !!pre);
+  const drawChips = () => { $("#sc").innerHTML = `<span class="chip ${!sTal ? "on" : ""}" data-k="">${I("busts_in_silhouette", "sm")} الكل</span>` + TALENTS.map(t => `<span class="chip ${sTal === t.k ? "on" : ""}" data-k="${t.k}">${I(t.i, "sm")} ${t.n}</span>`).join(""); $("#sc").querySelectorAll(".chip").forEach(c => c.onclick = () => { sTal = c.dataset.k; drawChips(); draw(); }); };
+  USERS = (await B.all("users")).filter(u => !u.blocked && u.name);
+  const draw = () => {
+    const q = norm($("#q").value);
+    const l = USERS.filter(u => {
+      if (sTal && !(u.talents || []).includes(sTal)) return false;
+      if (!q) return true;
+      const hay = norm([u.name, u.address, u.church, ...(u.custom || []), ...(u.talents || []).map(k => { const t = TALENTS.find(x => x.k === k); return t ? t.n + " " + t.s : k; })].join(" "));
+      return q.split(" ").every(w => hay.includes(w));
+    }).sort((a, b) => a.name.localeCompare(b.name, "ar"));
+    $("#sr").innerHTML = `<div class="muted" style="margin-bottom:8px">${l.length} خادم</div>` + (l.map(u => `<div class="item" onclick="go('user/${u.id}')">${avatar(u)}<div class="grow"><div class="t">${h(u.name)}${u.id === B.uid ? " (أنت)" : ""}</div>
+      <div>${(u.talents || []).map(k => `<span class="tag">${tName(k)}</span>`).join("")}${(u.custom || []).map(c => `<span class="tag">${h(c)}</span>`).join("")}</div>
+      <div class="muted">${I("round_pushpin", "sm")} ${h(u.address || "—")}${u.church ? " • " + h(u.church) : ""}</div></div></div>`).join("") || `<div class="empty">${I("magnifying_glass_tilted_left", "xl")}<p>مفيش نتائج</p></div>`);
+    hydrate($("#sr"));
+  };
+  drawChips(); $("#q").oninput = draw; draw();
+}
+
+/* ================= chat ================= */
+const chatId = (a, b) => [a, b].sort().join("_");
+async function openChatWith(uid){
+  const id = chatId(B.uid, uid);
+  const other = await B.get("users", uid);
+  await B.set("chats", id, { members: [B.uid, uid].sort(), names: { [B.uid]: ME.name, [uid]: other ? other.name : "" }, photos: { [B.uid]: ME.photo || "", [uid]: other && other.photo || "" } });
+  go("chat/" + id);
+}
+function pageChats(){
+  shell("الرسائل", `<div id="cl"></div>`);
+  $("#cl").innerHTML = CHATS.filter(c => c.lastAt).map(c => {
+    const o = c.members.find(m => m !== B.uid) || B.uid, un = c.lastBy !== B.uid && (c.seen && c.seen[B.uid] || 0) < c.lastAt;
+    return `<div class="item" onclick="go('chat/${c.id}')">${avatar({ photo: c.photos && c.photos[o] })}<div class="grow"><div class="t">${h(c.names && c.names[o] || "خادم")}</div><div class="muted" style="${un ? "color:var(--ink);font-weight:700" : ""}">${h((c.last || "").slice(0, 60))}</div></div><div style="text-align:center"><div class="muted">${ago(c.lastAt)}</div>${un ? '<span class="badge">جديد</span>' : ""}</div></div>`;
+  }).join("") || `<div class="empty">${I("speech_balloon", "xl")}<p>مفيش رسائل لسه. ابحث عن خادم وابعتله رسالة أو دعوة لخدمة</p><button class="btn navy" onclick="go('search')">${I("magnifying_glass_tilted_left", "sm")} ابحث عن خادم</button></div>`;
+  hydrate($("#cl"));
+}
+async function pageChat(id){
+  document.body.classList.add("noNav");
+  const c = await B.get("chats", id);
+  if (!c || !c.members.includes(B.uid)){ shell("محادثة", '<div class="empty">المحادثة مش موجودة</div>'); return; }
+  const o = c.members.find(m => m !== B.uid) || B.uid;
+  $("#app").innerHTML = `${DEMO ? '<div class="demo">نسخة تجريبية</div>' : ""}<div class="top"><button class="back" onclick="go('chats')">→</button>
+    <span onclick="go('user/${o}')" style="cursor:pointer">${avatar({ photo: c.photos && c.photos[o] }, "s")}</span><h1 onclick="go('user/${o}')" style="cursor:pointer">${h(c.names && c.names[o] || "خادم")}</h1>
+    <button class="back" title="دعوة لخدمة" onclick="inviteModal('${o}')">${I("handshake", "sm")}</button></div>
+    <div class="wrap"><div class="msgs" id="ms"><div class="empty"><span class="spin"></span></div></div></div>
+    <div class="composer"><button class="btn sm ghost" onclick="inviteModal('${o}')">${I("handshake", "sm")}</button><input id="mt" placeholder="اكتب رسالة..."><button class="btn sm navy" id="ms_send">إرسال</button></div>`;
+  hydrate($("#app"));
+  const send = async () => { const t = $("#mt").value.trim(); if (!t) return; $("#mt").value = ""; await sendMsg(id, { type: "text", text: t }); };
+  $("#ms_send").onclick = send; $("#mt").onkeydown = e => { if (e.key === "Enter") send(); };
+  let first = true;
+  unsubs.push(B.watch("messages", "chatId", "==", id, list => {
+    list.sort((a, b) => a.at - b.at);
+    const el = $("#ms"); if (!el) return;
+    el.innerHTML = list.map(m => msgHtml(m)).join("") || `<div class="empty">ابدأ المحادثة 👋</div>`;
+    window.scrollTo({ top: document.body.scrollHeight, behavior: first ? "auto" : "smooth" }); first = false;
+    B.set("chats", id, { seen: { [B.uid]: Date.now() } });
+  }));
+}
+function msgHtml(m){
+  const me = m.from === B.uid;
+  if (m.type === "invite"){
+    const v = m.invite || {};
+    const st = m.status === "accepted" ? `<span class="tag" style="background:#e3f5ec;color:var(--green)">✓ اتقبلت واتسجلت في الخدمات</span>` : m.status === "declined" ? `<span class="tag" style="background:#fdecea;color:var(--red)">اعتذر</span>` :
+      me ? `<span class="tag">في انتظار الرد</span>` : `<div class="row" style="margin-top:8px"><button class="btn sm green grow" onclick="answerInvite('${m.id}','accepted')">قبول ✓</button><button class="btn sm red grow" onclick="answerInvite('${m.id}','declined')">اعتذار</button></div>`;
+    return `<div class="m inv ${me ? "me" : "them"}"><b>${I("handshake", "sm")} دعوة لخدمة</b>
+      <div><b>${h(v.title || "خدمة")}</b></div><div>${I("spiral_calendar", "sm")} ${fmtDate(v.date)} — ${fmtTime(v.time)}</div>
+      <div>${I("church", "sm")} ${h(v.church)}${v.meeting ? " • " + h(v.meeting) : ""}</div>${v.place ? `<div>${I("round_pushpin", "sm")} ${h(v.place)}</div>` : ""}${v.notes ? `<div class="muted">${h(v.notes)}</div>` : ""}
+      <div style="margin-top:6px">${st}</div><div class="tm">${ago(m.at)}</div></div>`;
+  }
+  return `<div class="m ${me ? "me" : "them"}">${h(m.text)}<div class="tm">${ago(m.at)}</div></div>`;
+}
+async function sendMsg(cid, msg){
+  const at = Date.now();
+  await B.add("messages", { ...msg, chatId: cid, from: B.uid, at, status: msg.type === "invite" ? "pending" : "" });
+  await B.set("chats", cid, { last: msg.type === "invite" ? "🤝 دعوة لخدمة" : msg.text, lastAt: at, lastBy: B.uid, seen: { [B.uid]: at } });
+}
+function inviteModal(uid){
+  modal(`<h2>${I("handshake")} دعوة لخدمة</h2><p class="muted">الخادم هيوصله الدعوة في الرسائل، ولما يقبلها هتتسجل في خدماته على طول.</p>${svcForm({ church: ME.church })}<button class="btn block navy" id="iSend">${I("envelope", "sm")} إرسال الدعوة</button>`);
+  $("#iSend").onclick = async () => {
+    const v = readSvc(); if (!v.date || !(v.church || v.meeting)) return toast("حدد التاريخ والكنيسة");
+    busy($("#iSend"), true);
+    const id = chatId(B.uid, uid);
+    if (!(await B.get("chats", id))){ const o = await B.get("users", uid); await B.set("chats", id, { members: [B.uid, uid].sort(), names: { [B.uid]: ME.name, [uid]: o ? o.name : "" }, photos: { [B.uid]: ME.photo || "", [uid]: o && o.photo || "" } }); }
+    await sendMsg(id, { type: "invite", invite: v });
+    closeModal(); toast("تم إرسال الدعوة ✓"); if (curRoute()[0] !== "chat") go("chat/" + id);
+  };
+}
+async function answerInvite(mid, status){
+  const m = await B.get("messages", mid); if (!m) return;
+  if (status === "accepted"){
+    const c = await B.get("chats", m.chatId); const fromName = c && c.names && c.names[m.from] || "";
+    await B.add("services", { ...m.invite, ownerId: B.uid, invitedBy: fromName, createdAt: Date.now() });
+    toast("تم قبول الدعوة وتسجيلها في خدماتك ✓"); syncReminders();
+  }
+  await B.set("messages", mid, { status });
+  await B.set("chats", m.chatId, { last: status === "accepted" ? "✓ قبل الدعوة" : "اعتذر عن الدعوة", lastAt: Date.now(), lastBy: B.uid });
+}
+
+/* ================= announcements (إعلانات الإدارة) ================= */
+const AUD = [
+  { k: "all",       n: "كل الناس",        i: "busts_in_silhouette" },
+  { k: "word",      n: "خدام الكلمة",      i: "speaking_head" },
+  { k: "praise",    n: "خدام التسبيح",     i: "microphone" },
+  { k: "musicians", n: "كل العازفين",      i: "musical_notes" },
+  { k: "oud",       n: "عازفين العود",     i: "banjo" },
+  { k: "piano",     n: "عازفين البيانو",   i: "musical_keyboard" },
+  { k: "drums",     n: "عازفين الدرامز",   i: "drum" },
+  { k: "mizmar",    n: "عازفين المزمار",   i: "flute" }
+];
+const audName = a => (a || ["all"]).map(k => (AUD.find(x => x.k === k) || {}).n || k).join(" + ");
+function annForMe(a){
+  const aud = a.audience || ["all"]; if (aud.includes("all")) return true;
+  const t = (ME && ME.talents) || [];
+  return aud.some(k => k === "musicians" ? t.some(x => ["oud", "piano", "drums", "mizmar"].includes(x)) : t.includes(k));
+}
+let ANNS = [], annUnsub = null, annPopupOpen = false, MYREPLIES = {}, annShownIds = [];
+const myAnns = () => ANNS.filter(a => a.active !== false && (annForMe(a) || isAdmin())).sort((a, b) => b.at - a.at);
+const unseenAnns = () => { const seen = (ME && ME.annSeen) || []; return myAnns().filter(a => !seen.includes(a.id) && a.by !== B.uid); };
+function watchAnns(){
+  if (annUnsub) annUnsub();
+  annUnsub = B.watch("announcements", "active", "==", true, list => {
+    ANNS = list; renderNav();
+    const r = curRoute()[0];
+    if (r === "news") pageNews(); else if (r === "home") { const b = $("#annBadge"); if (b) b.textContent = unseenAnns().length || ""; }
+    setTimeout(() => { if (B.uid && unseenAnns().length && !annPopupOpen && !$("#ov") && !["chat", "news", "profile", "p"].includes(curRoute()[0])) showAnnPopup(); }, 600);
+  });
+  B.where("annReplies", "uid", "==", B.uid).then(l => { MYREPLIES = {}; l.forEach(x => MYREPLIES[x.annId] = x.status); }).catch(() => {});
+}
+function annCard(a, popup){
+  const v = a.invite || {}, rep = MYREPLIES[a.id];
+  return `<div class="card" style="border-inline-start:4px solid ${a.type === "invite" ? "var(--gold)" : "var(--navy2)"}">
+    <div class="row">${I(a.type === "invite" ? "handshake" : "megaphone")}<div class="grow"><b>${h(a.title || (a.type === "invite" ? "دعوة لخدمة" : "إعلان"))}</b><div class="muted">${ago(a.at)} • من إدارة جنود المسيح${isAdmin() ? " • لـ " + audName(a.audience) : ""}</div></div></div>
+    ${a.image ? `<img data-f="${h(a.image)}" onclick="openFile('${h(a.image)}',1)" style="width:100%;border-radius:14px;margin-top:10px;cursor:pointer;max-height:420px;object-fit:cover">` : ""}
+    ${a.text ? `<div style="white-space:pre-wrap;line-height:1.8;margin-top:8px">${h(a.text)}</div>` : ""}
+    ${a.type === "invite" ? `<div style="background:#fff8e1;border-radius:12px;padding:10px;margin-top:8px">
+      ${v.title ? `<b>${h(v.title)}</b>` : ""}<div>${I("spiral_calendar", "sm")} ${fmtDate(v.date)} — ${fmtTime(v.time)}</div>
+      <div>${I("church", "sm")} ${h(v.church)}${v.meeting ? " • " + h(v.meeting) : ""}</div>${v.place ? `<div>${I("round_pushpin", "sm")} ${h(v.place)}</div>` : ""}</div>
+      ${a.by === B.uid ? "" : rep === "accepted" ? `<div class="tag" style="background:#e3f5ec;color:var(--green);margin-top:8px">✓ قبلت الدعوة واتسجلت في خدماتك</div>` : rep === "declined" ? `<div class="tag" style="margin-top:8px">اعتذرت</div>` :
+        `<div class="row" style="margin-top:8px"><button class="btn sm green grow" onclick="replyAnn('${a.id}','accepted',${popup ? 1 : 0})">قبول ✓</button><button class="btn sm red grow" onclick="replyAnn('${a.id}','declined',${popup ? 1 : 0})">اعتذار</button></div>`}` : ""}
+  </div>`;
+}
+function showAnnPopup(){
+  const l = unseenAnns(); if (!l.length) return;
+  annPopupOpen = true;
+  annShownIds = l.map(a => a.id);
+  modal(`<h2>${I("megaphone")} رسالة من إدارة جنود المسيح</h2><div id="annPop">${l.map(a => annCard(a, true)).join("")}</div><button class="btn block navy" id="annOk">تمام</button>`);
+  annPopupOpen = true;
+  $("#annOk").onclick = () => closeModal();
+}
+async function markAnnsSeen(ids){ ids = ids || annShownIds; if (!ME || !ids || !ids.length) return; ME.annSeen = [...new Set([...(ME.annSeen || []), ...ids])].slice(-300); renderNav(); const b = $("#annBadge"); if (b) b.textContent = unseenAnns().length || ""; try { await B.set("users", B.uid, { annSeen: ME.annSeen }); } catch (e) {} }
+async function replyAnn(id, status, popup){
+  const a = ANNS.find(x => x.id === id); if (!a) return;
+  if (status === "accepted") await B.add("services", { ...(a.invite || {}), ownerId: B.uid, invitedBy: "إدارة جنود المسيح", createdAt: Date.now() });
+  await B.set("annReplies", id + "_" + B.uid, { annId: id, uid: B.uid, name: ME.name, phone: ME.phone || "", status, at: Date.now() });
+  MYREPLIES[id] = status; if (status === "accepted") syncReminders();
+  toast(status === "accepted" ? "تم القبول وتسجيل الخدمة في خدماتك ✓" : "تم إرسال اعتذارك");
+  if (popup && $("#annPop")) { $("#annPop").innerHTML = unseenAnns().map(x => annCard(x, true)).join(""); hydrate($("#annPop")); }
+  else if (curRoute()[0] === "news") pageNews();
+}
+function pageNews(){
+  const l = myAnns();
+  shell("الإعلانات", (isAdmin() ? `<button class="btn block navy" style="margin:0 0 12px" onclick="composeAnn()">${I("megaphone", "sm")} ابعت إعلان أو دعوة</button>` : "")
+    + (l.map(a => annCard(a) + (isAdmin() ? `<div class="row" style="margin:-4px 0 14px"><button class="btn sm ghost grow" onclick="annReplies('${a.id}')">${I("busts_in_silhouette", "sm")} الردود</button><button class="btn sm red" onclick="delAnn('${a.id}')">${I("wastebasket", "sm")} حذف</button></div>` : "")).join("")
+    || `<div class="empty">${I("megaphone", "xl")}<p>مفيش إعلانات لسه</p></div>`));
+  if (unseenAnns().length && !annPopupOpen) markAnnsSeen(l.map(a => a.id));
+}
+function composeAnn(){
+  if (!isAdmin()) return;
+  let aud = ["all"], type = "news", image = "";
+  modal(`<h2>${I("megaphone")} إعلان جديد</h2>
+    <div class="tabs" id="anT"><button class="on" data-t="news">${I("megaphone", "sm")} إعلان</button><button data-t="invite">${I("handshake", "sm")} دعوة لخدمة</button></div>
+    <label>يوصل لمين؟ (تقدر تختار أكتر من مجموعة)</label><div class="chips" id="anA"></div>
+    <label>العنوان</label><input id="anTitle" placeholder="مثال: مؤتمر الخدام السنوي">
+    <label>نص الإعلان</label><textarea id="anText"></textarea>
+    <label>صورة (اختياري)</label><div id="anImg"></div>
+    <button class="btn sm ghost" id="anImgB" style="margin-top:6px">${I("camera", "sm")} اختار صورة</button><input type="file" id="anImgF" accept="image/*" hidden>
+    <div id="anInv" style="display:none"><h3 style="margin-top:14px">${I("clipboard", "sm")} تفاصيل الخدمة</h3>${svcForm({ church: ME.church })}</div>
+    <div id="anSt" class="muted"></div>
+    <button class="btn block navy" id="anSend">${I("outbox_tray", "sm")} إرسال</button>`);
+  const drawA = () => { $("#anA").innerHTML = AUD.map(a => `<span class="chip ${aud.includes(a.k) ? "on" : ""}" data-k="${a.k}">${I(a.i, "sm")} ${a.n}</span>`).join("");
+    $("#anA").querySelectorAll(".chip").forEach(c => c.onclick = () => { const k = c.dataset.k; if (k === "all") aud = ["all"]; else { aud = aud.filter(x => x !== "all"); aud = aud.includes(k) ? aud.filter(x => x !== k) : [...aud, k]; if (!aud.length) aud = ["all"]; } drawA(); }); };
+  const drawI = () => { $("#anImg").innerHTML = image ? `<div style="position:relative"><img data-f="${h(image)}" style="width:100%;border-radius:12px"><button class="btn sm red" style="position:absolute;top:6px;left:6px" id="anImgX">✕</button></div>` : ""; hydrate($("#anImg")); if ($("#anImgX")) $("#anImgX").onclick = () => { image = ""; drawI(); }; };
+  drawA(); drawI();
+  $("#anT").querySelectorAll("button").forEach(b => b.onclick = () => { type = b.dataset.t; $("#anT").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); $("#anInv").style.display = type === "invite" ? "" : "none"; });
+  $("#anImgB").onclick = () => $("#anImgF").click();
+  $("#anImgF").onchange = async e => { try { const [f] = await uploadMany([e.target.files[0]], $("#anSt")); image = f.url; drawI(); } catch (er){ $("#anSt").innerHTML = ""; toast(er.message || "فشل رفع الصورة"); } };
+  $("#anSend").onclick = async () => {
+    const o = { type, audience: aud, title: $("#anTitle").value.trim(), text: $("#anText").value.trim(), image, by: B.uid, at: Date.now(), active: true };
+    if (type === "invite"){ o.invite = readSvc(); if (!o.invite.date || !(o.invite.church || o.invite.meeting)) return toast("حدد تاريخ الخدمة والكنيسة"); }
+    else if (!o.text && !o.image) return toast("اكتب نص أو اختار صورة");
+    busy($("#anSend"), true);
+    await B.add("announcements", o);
+    closeModal(); toast(`تم الإرسال لـ ${audName(aud)} ✓`); if (curRoute()[0] !== "news") go("news"); else pageNews();
+  };
+}
+async function annReplies(id){
+  const l = (await B.where("annReplies", "annId", "==", id)).sort((a, b) => b.at - a.at);
+  const acc = l.filter(x => x.status === "accepted"), dec = l.filter(x => x.status === "declined");
+  modal(`<h2>${I("busts_in_silhouette")} الردود</h2>
+    <h3 style="color:var(--green)">قبلوا (${acc.length})</h3>${acc.map(x => `<div class="item" onclick="closeModal();go('user/${x.uid}')"><b class="grow">${h(x.name)}</b><span class="muted" dir="ltr">${h(x.phone)}</span></div>`).join("") || '<div class="muted">لسه محدش</div>'}
+    <h3 style="color:var(--red);margin-top:12px">اعتذروا (${dec.length})</h3>${dec.map(x => `<div class="item" onclick="closeModal();go('user/${x.uid}')"><b class="grow">${h(x.name)}</b></div>`).join("") || '<div class="muted">—</div>'}
+    <button class="btn block ghost" onclick="closeModal()">إغلاق</button>`);
+}
+async function delAnn(id){ if (!(await confirmBox("تحذف الإعلان ده؟ مش هيظهر لحد تاني"))) return; await B.set("announcements", id, { active: false }); toast("تم الحذف"); }
+
+/* ================= admin ================= */
+async function pageAdmin(){
+  if (!isAdmin()) return go("home");
+  shell("الإدارة", `<button class="btn block navy" style="margin:0 0 12px" onclick="composeAnn()">${I("megaphone", "sm")} ابعت إعلان أو دعوة (نص / صورة)</button><button class="btn block ghost" style="margin:0 0 12px" onclick="go('news')">${I("scroll", "sm")} الإعلانات اللي اتبعتت والردود</button><div class="tabs"><button class="on" id="aU">${I("busts_in_silhouette", "sm")} الخدام</button><button id="aB">${I("books", "sm")} الكتب</button></div><div id="al"><div class="empty"><span class="spin"></span></div></div>`);
+  const [users, books] = await Promise.all([B.all("users"), B.all("books")]);
+  const drawU = () => { $("#al").innerHTML = `<div class="muted" style="margin-bottom:8px">${users.length} مستخدم</div>` + users.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).map(u => `<div class="item">${avatar(u)}<div class="grow" onclick="go('user/${u.id}')"><div class="t">${h(u.name || "بدون اسم")} ${u.blocked ? '<span class="tag" style="background:#fdecea;color:var(--red)">موقوف</span>' : ""}</div><div class="muted" dir="ltr" style="text-align:right">${h(u.phone)}</div></div>${u.id === B.uid ? "" : u.blocked ? `<button class="btn sm green" onclick="adminBlock('${u.id}',false)">تفعيل</button>` : `<button class="btn sm red" onclick="adminBlock('${u.id}')">إيقاف</button>`}</div>`).join(""); hydrate($("#al")); };
+  const drawB = () => { $("#al").innerHTML = books.map(b => `<div class="row">${`<div class="grow">${bookItem(b)}</div>`}<button class="btn sm red" onclick="delBook('${b.id}')">${I("wastebasket", "sm")}</button></div>`).join("") || '<div class="empty">مفيش كتب</div>'; hydrate($("#al")); };
+  $("#aU").onclick = () => { $("#aU").classList.add("on"); $("#aB").classList.remove("on"); drawU(); };
+  $("#aB").onclick = () => { $("#aB").classList.add("on"); $("#aU").classList.remove("on"); drawB(); };
+  drawU();
+}
+async function adminBlock(id, block = true){ if (!(await confirmBox(block ? "إيقاف الحساب ده؟ مش هيظهر في البحث ومش هيقدر يدخل" : "تفعيل الحساب؟"))) return; await B.set("users", id, { blocked: block }); toast("تم ✓"); route(); }
+
+/* expose for inline handlers */
+Object.assign(window, { syncReminders, pageNews, composeAnn, replyAnn, annReplies, delAnn, shareProfile, pagePublic, go, openExt, openFile, renderAuth, editSvc, delSvc, editTopic, delTopic, delDev, editBook, delBook, openChatWith, inviteModal, answerInvite, adminBlock, pageKhalwa });
+</script>
+</body>
+</html>

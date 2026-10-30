@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // صاحب البرنامج (الأدمن)
+    function isAdmin() { return request.auth != null && request.auth.token.email == 'rafatsaeed719@gmail.com'; }
+    function signedIn() { return request.auth != null; }
+    function owner() { return signedIn() && resource.data.ownerId == request.auth.uid; }
+    function newOwner() { return signedIn() && request.resource.data.ownerId == request.auth.uid; }
+
+    match /users/{uid} {
+      // البروفايل بيظهر لأي حد عنده اللينك (حتى لو مش متسجل)
+      allow read: if true;
+      allow create: if signedIn() && request.auth.uid == uid;
+      allow update: if (signedIn() && request.auth.uid == uid
+                        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['blocked'])) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    // خدماتي - موضوعاتي - خلواتي: كل خادم يشوف حاجته بس
+    match /services/{id}  { allow read, update, delete: if owner(); allow create: if newOwner(); }
+    match /topics/{id}    { allow read, update, delete: if owner(); allow create: if newOwner(); }
+    match /devotions/{id} { allow read, update, delete: if owner(); allow create: if newOwner(); }
+
+    // المكتبة: الكل يشوف، صاحب الكتاب أو الأدمن يعدل ويحذف
+    match /books/{id} {
+      allow read: if signedIn();
+      allow create: if newOwner();
+      allow update, delete: if owner() || isAdmin();
+    }
+    // الإعلانات: الأدمن بس يبعت، والكل يقرا
+    match /announcements/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+    // ردود الدعوات العامة
+    match /annReplies/{id} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create, update: if signedIn() && request.resource.data.uid == request.auth.uid;
+    }
+    // الشات
+    match /chats/{id} {
+      allow read: if signedIn() && (resource == null || request.auth.uid in resource.data.members);
+      allow create: if signedIn() && request.auth.uid in request.resource.data.members;
+      allow update: if signedIn() && request.auth.uid in resource.data.members;
+    }
+    match /messages/{id} {
+      allow read: if signedIn() && request.auth.uid in resource.data.chatId.split('_');
+      allow create: if signedIn() && request.resource.data.from == request.auth.uid
+                    && request.auth.uid in request.resource.data.chatId.split('_');
+      allow update: if signedIn() && request.auth.uid in resource.data.chatId.split('_');
+    }
+  }
+}

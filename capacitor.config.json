@@ -1,0 +1,14 @@
+{
+  "appId": "com.bethel.soc",
+  "appName": "جنود المسيح",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_soc",
+      "iconColor": "#E9B949"
+    }
+  }
+}

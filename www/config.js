@@ -1,0 +1,27 @@
+// ===== إعدادات برنامج جنود المسيح S.O.C =====
+// لو سبت firebase = null البرنامج هيشتغل "نسخة تجريبية" والبيانات بتتحفظ على الجهاز بس.
+window.SOC_CONFIG = {
+  // الصق هنا إعدادات Firebase (Project settings > Your apps > Web app > Config)
+  firebase: null,
+  /* مثال:
+  firebase: {
+    apiKey: "AIza....",
+    authDomain: "soc-app.firebaseapp.com",
+    projectId: "soc-app",
+    appId: "1:123:web:abc"
+  },
+  */
+
+  // Cloudinary لرفع الصور والملفات (Upload preset لازم يكون Unsigned)
+  cloudinary: { cloudName: "", uploadPreset: "" },
+
+  // الأدمن (صاحب البرنامج): يدخل بالإيميل ده ويقدر يبعت إعلانات ويحذف أي كتاب أو مستخدم
+  adminEmails: ["rafatsaeed719@gmail.com"],
+  adminPhones: [],
+
+  // عنوان البرنامج على الإنترنت (مثلاً https://rafatsaeed719-ui.github.io/soc-app/)
+  // ده اللي بيتعمل منه لينك "شارك بروفايلي" اللي يفتح لأي حد
+  publicUrl: "",
+
+  developerSite: "https://rafatsaeed.com"
+};
