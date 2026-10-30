@@ -2,7 +2,14 @@
 // لو سبت firebase = null البرنامج هيشتغل "نسخة تجريبية" والبيانات بتتحفظ على الجهاز بس.
 window.SOC_CONFIG = {
   // الصق هنا إعدادات Firebase (Project settings > Your apps > Web app > Config)
-  firebase: null,
+  firebase: {
+    apiKey: "AIzaSyBYCAdaz05qxuFP1i3izz_Vb0jXvCCnpq8",
+    authDomain: "soc-app-1ee2b.firebaseapp.com",
+    projectId: "soc-app-1ee2b",
+    storageBucket: "soc-app-1ee2b.firebasestorage.app",
+    messagingSenderId: "707034160209",
+    appId: "1:707034160209:web:72e43ccc39883e63c22c70"
+  },
   /* مثال:
   firebase: {
     apiKey: "AIza....",
@@ -13,7 +20,7 @@ window.SOC_CONFIG = {
   */
 
   // Cloudinary لرفع الصور والملفات (Upload preset لازم يكون Unsigned)
-  cloudinary: { cloudName: "", uploadPreset: "" },
+  cloudinary: { cloudName: "zbkqpekr", uploadPreset: "soc_upload" },
 
   // الأدمن (صاحب البرنامج): يدخل بالإيميل ده ويقدر يبعت إعلانات ويحذف أي كتاب أو مستخدم
   adminEmails: ["rafatsmart47@gmail.com"],
