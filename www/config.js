@@ -16,7 +16,7 @@ window.SOC_CONFIG = {
   cloudinary: { cloudName: "", uploadPreset: "" },
 
   // الأدمن (صاحب البرنامج): يدخل بالإيميل ده ويقدر يبعت إعلانات ويحذف أي كتاب أو مستخدم
-  adminEmails: ["rafatsaeed719@gmail.com"],
+  adminEmails: ["rafatsmart47@gmail.com"],
   adminPhones: [],
 
   // عنوان البرنامج على الإنترنت (مثلاً https://rafatsaeed719-ui.github.io/soc-app/)
