@@ -9,6 +9,10 @@
     "LocalNotifications": {
       "smallIcon": "ic_stat_soc",
       "iconColor": "#E9B949"
+    },
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "DARK"
     }
   }
 }

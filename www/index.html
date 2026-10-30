@@ -244,7 +244,8 @@ function makeDemo(){
       async signUp(phone, pass){ const db = authDb(); if (db[phone]) throw { code: "auth/email-already-in-use" }; const uid = uidGen(); db[phone] = { pass, uid }; localStorage.setItem(A, JSON.stringify(db)); return api.auth._in(uid, phone); },
       async signIn(phone, pass){ const a = authDb()[phone]; if (!a) throw { code: "auth/user-not-found" }; if (a.pass !== pass) throw { code: "auth/wrong-password" }; return api.auth._in(a.uid, phone); },
       _in(uid, phone){ api.uid = uid; api.phone = phone; localStorage.setItem(S, JSON.stringify({ uid, phone })); cb && cb(uid); return uid; },
-      async signOut(){ api.uid = null; localStorage.removeItem(S); cb && cb(null); }
+      async signOut(){ api.uid = null; localStorage.removeItem(S); cb && cb(null); },
+      async deleteMe(pass){ const db = authDb(); const k = Object.keys(db).find(x => db[x].uid === api.uid); if (k && db[k].pass !== pass) throw { code: "auth/wrong-password" }; if (k) delete db[k]; localStorage.setItem(A, JSON.stringify(db)); }
     },
     async get(c, id){ const d = coll(c)[id]; return d ? { id, ...d } : null; },
     async set(c, id, obj){ const cur = coll(c)[id] || {}; const nx = { ...cur }; for (const k in obj){ const v = obj[k]; nx[k] = (v && typeof v === "object" && !Array.isArray(v) && cur[k] && typeof cur[k] === "object" && !Array.isArray(cur[k])) ? { ...cur[k], ...v } : v; } coll(c)[id] = nx; save(); fire(c); },
@@ -283,7 +284,8 @@ function makeFirebase(){
       onChange(f){ auth.onAuthStateChanged(u => { api.uid = u ? u.uid : null; api.phone = u ? ((u.email || "").endsWith("@soc-app.com") ? u.email.split("@")[0] : (u.email || "").toLowerCase()) : null; f(api.uid); }); },
       async signUp(p, pass){ const r = await auth.createUserWithEmailAndPassword(mail(p), pass); return r.user.uid; },
       async signIn(p, pass){ const r = await auth.signInWithEmailAndPassword(mail(p), pass); return r.user.uid; },
-      signOut(){ return auth.signOut(); }
+      signOut(){ return auth.signOut(); },
+      async deleteMe(pass){ const u = auth.currentUser; const cred = firebase.auth.EmailAuthProvider.credential(u.email, pass); await u.reauthenticateWithCredential(cred); await u.delete(); }
     },
     async get(c, id){ const d = await db.collection(c).doc(id).get(); return d.exists ? { id: d.id, ...d.data() } : null; },
     set(c, id, o){ return db.collection(c).doc(id).set(o, { merge: true }); },
@@ -471,7 +473,8 @@ function pageProfile(){
     <button class="btn block navy" id="pSave">${I("check_mark_button", "sm")} حفظ البروفايل</button>
     ${firstTime ? "" : `<button class="btn block" onclick="shareProfile()">${I("outbox_tray", "sm")} شارك لينك بروفايلي (واتساب)</button>
     <button class="btn block ghost" onclick="go('user/${B.uid}')">${I("bust_in_silhouette", "sm")} شوف بروفايلي زي ما الناس شايفاه</button>
-    <button class="btn block red" id="logout">${I("door", "sm")} تسجيل الخروج</button>`}`, !firstTime);
+    <button class="btn block red" id="logout">${I("door", "sm")} تسجيل الخروج</button>
+    <button class="btn block ghost" id="delAcc" style="color:var(--red);margin-top:22px">${I("wastebasket", "sm")} حذف حسابي نهائياً</button>`}`, !firstTime);
   const drawTal = () => {
     $("#tal").innerHTML = TALENTS.map(t => `<span class="chip ${P.talents.includes(t.k) ? "on" : ""}" data-k="${t.k}">${I(t.i, "sm")} ${t.n}</span>`).join("") +
       P.custom.map((c, i) => `<span class="chip on">${I("musical_notes", "sm")} ${h(c)} <span class="x" data-del="${i}">✕</span></span>`).join("");
@@ -496,6 +499,7 @@ function pageProfile(){
     catch (er){ busy(btn, false); toast(er.message || "فشل رفع الصورة"); }
   };
   if ($("#logout")) $("#logout").onclick = async () => { if (await confirmBox("تسجيل الخروج؟")) B.auth.signOut(); };
+  if ($("#delAcc")) $("#delAcc").onclick = deleteAccountModal;
   $("#pSave").onclick = async () => {
     const name = $("#pName").value.trim(); if (!name) return toast("اكتب اسمك");
     const o = { name, nameN: norm(name), phone: digits($("#pPhone").value), address: $("#pAddr").value.trim(), church: $("#pChurch").value.trim(), bio: $("#pBio").value.trim(), talents: P.talents, custom: P.custom, updatedAt: Date.now() };
@@ -1131,6 +1135,29 @@ async function pageAdmin(){
 }
 async function adminBlock(id, block = true){ if (!(await confirmBox(block ? "إيقاف الحساب ده؟ مش هيظهر في البحث ومش هيقدر يدخل" : "تفعيل الحساب؟"))) return; await B.set("users", id, { blocked: block }); toast("تم ✓"); route(); }
 
+
+/* ================= حذف الحساب ================= */
+function deleteAccountModal(){
+  modal(`<h2>${I("wastebasket")} حذف حسابي نهائياً</h2>
+    <p>هيتمسح بروفايلك وخدماتك وموضوعاتك وخلواتك والكتب اللي رفعتها، ومش هتقدر ترجعهم تاني.</p>
+    <label>اكتب كلمة السر للتأكيد</label><input id="dPass" type="password" dir="ltr">
+    <button class="btn block red" id="dGo" style="background:var(--red);color:#fff">حذف الحساب نهائياً</button>
+    <button class="btn block ghost" onclick="closeModal()">إلغاء</button>`);
+  $("#dGo").onclick = async () => {
+    const pass = $("#dPass").value; if (!pass) return toast("اكتب كلمة السر");
+    busy($("#dGo"), true);
+    try {
+      for (const c of ["services", "topics", "devotions", "books"]){
+        const l = await B.where(c, "ownerId", "==", B.uid);
+        for (const d of l) await B.del(c, d.id);
+      }
+      await B.set("users", B.uid, { name: "", nameN: "", phone: "", email: "", address: "", church: "", bio: "", photo: "", talents: [], custom: [], deleted: true });
+      await B.auth.deleteMe(pass);
+      try { await B.del("users", B.uid); } catch (e) {}
+      closeModal(); toast("تم حذف حسابك"); if (DEMO) B.auth.signOut();
+    } catch (e){ busy($("#dGo"), false); toast(authErr(e)); }
+  };
+}
 /* expose for inline handlers */
 Object.assign(window, { syncReminders, pageNews, composeAnn, replyAnn, annReplies, delAnn, shareProfile, pagePublic, go, openExt, openFile, renderAuth, editSvc, delSvc, editTopic, delTopic, delDev, editBook, delBook, openChatWith, inviteModal, answerInvite, adminBlock, pageKhalwa });
 </script>

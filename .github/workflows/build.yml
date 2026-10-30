@@ -1,4 +1,4 @@
-name: Build APK + Website
+name: Build APK + AAB + Website
 
 on:
   push:
@@ -11,13 +11,13 @@ permissions:
   id-token: write
 
 jobs:
-  apk:
+  android:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -26,33 +26,43 @@ jobs:
         run: npm install
       - name: Add Android platform
         run: npx cap add android
-      - name: App icon
-        run: npx capacitor-assets generate --android --iconBackgroundColor '#14213d' --splashBackgroundColor '#14213d' || true
-      - name: Notification icon + permissions
+      - name: App icon + splash
+        run: npx capacitor-assets generate --android --iconBackgroundColor '#ffffff' --splashBackgroundColor '#ffffff' || true
+      - name: Version, notification icon, permissions
         run: |
+          G=android/app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" $G
+          sed -i "s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" $G
+          grep -n "versionCode\|versionName" $G
+          grep -n "SdkVersion" android/variables.gradle
           mkdir -p android/app/src/main/res/drawable
           cp assets/ic_stat_soc.png android/app/src/main/res/drawable/ic_stat_soc.png
           M=android/app/src/main/AndroidManifest.xml
-          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />\n</manifest>#' $M
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />\n</manifest>#' $M
           grep -n "permission" $M
       - name: Sync
         run: npx cap sync android
-      - name: Build APK
+      - name: Build APK (debug) + AAB (release, unsigned)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug bundleRelease
           cp app/build/outputs/apk/debug/app-debug.apk ../SOC.apk
+          cp app/build/outputs/bundle/release/app-release.aab ../SOC-unsigned.aab
       - uses: actions/upload-artifact@v4
         with:
-          name: SOC-apk
-          path: SOC.apk
-      - name: Publish release (رابط تحميل مباشر)
+          name: SOC-android
+          path: |
+            SOC.apk
+            SOC-unsigned.aab
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
-          name: جنود المسيح - نسخة ${{ github.run_number }}
-          files: SOC.apk
+          name: جنود المسيح - نسخة 1.0.${{ github.run_number }}
+          files: |
+            SOC.apk
+            SOC-unsigned.aab
 
   website:
     runs-on: ubuntu-latest
