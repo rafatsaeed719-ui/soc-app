@@ -28,7 +28,7 @@ window.SOC_CONFIG = {
 
   // عنوان البرنامج على الإنترنت (مثلاً https://rafatsaeed719-ui.github.io/soc-app/)
   // ده اللي بيتعمل منه لينك "شارك بروفايلي" اللي يفتح لأي حد
-  publicUrl: "",
+  publicUrl: "https://rafatsaeed719-ui.github.io/soc-app/",
 
   developerSite: "https://rafatsaeed.com"
 };
