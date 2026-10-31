@@ -38,8 +38,9 @@ jobs:
           mkdir -p android/app/src/main/res/drawable
           cp assets/ic_stat_soc.png android/app/src/main/res/drawable/ic_stat_soc.png
           M=android/app/src/main/AndroidManifest.xml
-          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:maxSdkVersion="32" />\n    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />\n</manifest>#' $M
+          sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />\n</manifest>#' $M
           grep -n "permission" $M
+          if grep -q "EXACT_ALARM" $M; then echo "exact alarm still present"; exit 1; fi
       - name: Sync
         run: npx cap sync android
       - name: Build APK (debug) + AAB (release, unsigned)
