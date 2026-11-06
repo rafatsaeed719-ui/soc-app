@@ -167,7 +167,7 @@ function fmtTime(t){ if(!t) return ""; let [H,M] = t.split(":").map(Number); con
 function ago(ts){ const d = new Date(ts), n = new Date(); if (ymd(d) === ymd(n)) return `${d.getHours() % 12 || 12}:${pad(d.getMinutes())} ${d.getHours() < 12 ? "ص" : "م"}`; return `${d.getDate()} ${MONTHS[d.getMonth()]}`; }
 function toast(m){ const t = document.createElement("div"); t.className = "toast"; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
 function modal(html){ closeModal(); const o = document.createElement("div"); o.className = "ov"; o.id = "ov"; o.innerHTML = `<div class="sheet">${html}</div>`; o.onclick = e => { if (e.target === o) closeModal(); }; document.body.appendChild(o); hydrate(o); return o; }
-function closeModal(){ const o = $("#ov"); if (!o) return; const wasAnn = !!o.querySelector("#annPop"); o.remove(); if (wasAnn){ annPopupOpen = false; markAnnsSeen(); } }
+function closeModal(){ const o = $("#ov"); if (!o) return; const wasAnn = !!o.querySelector("#annPop"), pop = o.dataset.pop, ids = o.dataset.ids; o.remove(); if (wasAnn){ annPopupOpen = false; markAnnsSeen(); } if (pop === "cm" && ids) markCMSeen(ids.split(",")); if (wasAnn || pop) setTimeout(() => { if (typeof checkPopups === "function") checkPopups(); }, 500); }
 function openExt(url){
   try { const Br = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser; if (Br && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) { Br.open({ url }); return; } } catch (e) {}
   const a = document.createElement("a"); a.href = url; a.target = "_blank"; a.rel = "noopener"; document.body.appendChild(a); a.click(); a.remove();
@@ -328,12 +328,12 @@ function go(path){ location.hash = "#/" + path; }
 window.addEventListener("hashchange", route);
 
 B.auth.onChange(async uid => {
-  if (!uid){ ME = null; if (chatUnsub) { chatUnsub(); chatUnsub = null; } if (annUnsub) { annUnsub(); annUnsub = null; } if (curRoute()[0] === "p") return pagePublic(curRoute()[1]); renderAuth(); return; }
+  if (!uid){ ME = null; DEVS = null; if (chatUnsub) { chatUnsub(); chatUnsub = null; } if (annUnsub) { annUnsub(); annUnsub = null; } if (cmUnsub) { cmUnsub(); cmUnsub = null; } if (curRoute()[0] === "p") return pagePublic(curRoute()[1]); renderAuth(); return; }
   ME = await B.get("users", uid);
   if (!ME){ ME = { id: uid, name: window.__newName || "", phone: B.phone, talents: [], custom: [] }; }
   if (curRoute()[0] === "p"){ watchChats(); watchAnns(); return pagePublic(curRoute()[1]); }
   if (ME.blocked){ toast("تم إيقاف هذا الحساب من الإدارة"); B.auth.signOut(); return; }
-  watchChats(); watchAnns(); syncReminders();
+  watchChats(); watchAnns(); watchCM(); syncReminders(); syncKhalwaNotifs();
   if (!ME.name) go("profile"); else route();
 });
 
@@ -352,10 +352,10 @@ function route(){
   closeModal(); window.scrollTo(0, 0);
   document.body.classList.remove("noNav");
   const [p, a] = curRoute();
-  const pages = { home: pageHome, profile: pageProfile, user: pageUser, services: pageServices, calendar: pageCalendar, topics: pageTopics, topic: pageTopic, khalwa: pageKhalwa, library: pageLibrary, book: pageBook, search: pageSearch, chats: pageChats, chat: pageChat, admin: pageAdmin, news: pageNews };
+  const pages = { home: pageHome, profile: pageProfile, user: pageUser, services: pageServices, calendar: pageCalendar, topics: pageTopics, topic: pageTopic, khalwa: pageKhalwa, library: pageLibrary, book: pageBook, search: pageSearch, chats: pageChats, chat: pageChat, admin: pageAdmin, news: pageNews, churches: pageChurches, mychurch: pageMyChurch, sector: pageSector, churchmsgs: pageChurchMsgs };
   (pages[p] || pageHome)(a);
   renderNav();
-  if (typeof unseenAnns === "function") setTimeout(() => { if (B.uid && ME && ME.name && unseenAnns().length && !annPopupOpen && !$("#ov") && !["chat", "news", "profile"].includes(curRoute()[0])) showAnnPopup(); }, 700);
+  setTimeout(() => checkPopups(), 700);
 }
 
 function renderNav(){
@@ -382,13 +382,17 @@ function renderAuth(mode = "login"){
     <div class="logo"><div class="logoBox"><img src="logo.png" alt="جنود المسيح S.O.C"></div><div style="color:#cdd6ee;font-size:13px;margin-top:4px">«فاشترك أنت في احتمال المشقات كجندي صالح ليسوع المسيح»</div></div>
     <div class="card">
       <div class="tabs"><button class="${reg ? "" : "on"}" onclick="renderAuth('login')">تسجيل الدخول</button><button class="${reg ? "on" : ""}" onclick="renderAuth('reg')">حساب جديد</button></div>
-      ${reg ? `<label>الاسم بالكامل</label><input id="aName" placeholder="مثال: مينا عادل">` : ""}
+      ${reg ? `<label>نوع الحساب</label><div class="tabs" id="aRole" style="margin:0"><button class="on" data-r="servant">خادم</button><button data-r="pastor">قسيس / راعي كنيسة</button></div>
+      <label>الاسم بالكامل</label><input id="aName" placeholder="مثال: مينا عادل">
+      <div id="aCh" style="display:none"><label>اسم الكنيسة اللي برعاها</label><input id="aChN" placeholder="مثال: كنيسة مارمرقس بشبرا"><label>عنوان الكنيسة</label><input id="aChA" placeholder="المدينة - المنطقة - الشارع"></div>` : ""}
       <label>رقم التليفون (أو الإيميل)</label><input id="aPhone" type="text" autocomplete="username" placeholder="01xxxxxxxxx" dir="ltr">
       <label>كلمة السر</label><input id="aPass" type="password" placeholder="6 حروف أو أرقام على الأقل" dir="ltr">
       ${reg ? `<label>تأكيد كلمة السر</label><input id="aPass2" type="password" dir="ltr">` : ""}
       <button class="btn block navy" id="aBtn">${reg ? "إنشاء الحساب" : "دخول"}</button>
       ${DEMO ? `<p class="muted" style="text-align:center">نسخة تجريبية: سجّل بأي رقم وكلمة سر وجرّب</p>` : ""}
     </div>${footer()}</div>`;
+  let role = "servant";
+  if ($("#aRole")) $("#aRole").querySelectorAll("button").forEach(b => b.onclick = () => { role = b.dataset.r; $("#aRole").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); $("#aCh").style.display = role === "pastor" ? "" : "none"; });
   $("#aBtn").onclick = async () => {
     const raw = $("#aPhone").value.trim(), isMail = raw.includes("@"), pass = $("#aPass").value;
     const phone = isMail ? raw.toLowerCase() : digits(raw);
@@ -399,9 +403,12 @@ function renderAuth(mode = "login"){
       if (reg){
         const name = $("#aName").value.trim(); if (!name){ busy(btn, false); return toast("اكتب اسمك"); }
         if (pass !== $("#aPass2").value){ busy(btn, false); return toast("كلمتين السر مش زي بعض"); }
+        const chN = role === "pastor" ? $("#aChN").value.trim() : "", chA = role === "pastor" ? $("#aChA").value.trim() : "";
+        if (role === "pastor" && (!chN || !chA)){ busy(btn, false); return toast("اكتب اسم الكنيسة وعنوانها"); }
         window.__newName = name;
         const uid = await B.auth.signUp(phone, pass);
-        await B.set("users", uid, { name, nameN: norm(name), phone: isMail ? "" : phone, email: isMail ? phone : "", talents: [], custom: [], address: "", church: "", bio: "", photo: "", createdAt: Date.now() });
+        await B.set("users", uid, { name, nameN: norm(name), phone: isMail ? "" : phone, email: isMail ? phone : "", talents: [], custom: [], address: "", church: chN, bio: "", photo: "", role, createdAt: Date.now() });
+        if (role === "pastor"){ ME = { id: uid, name }; const cid = await createChurch(chN, chA); await B.set("users", uid, { churchId: cid }); }
         ME = await B.get("users", uid); route();
       } else {
         try { await B.auth.signIn(phone, pass); }
@@ -428,7 +435,7 @@ function pageHome(){
   shell(`<span class="brand"><img class="hlogo" src="logo-mark.png" alt=""> جنود المسيح <small>S.O.C</small></span>`, `
     <div class="hero" onclick="go('profile')">${avatar(ME, "")}<div class="grow"><h2>سلام ونعمة يا ${h((ME.name || "").split(" ")[0])}</h2>
       <div class="muted">${(ME.talents || []).map(tName).concat(ME.custom || []).join(" • ") || "اضغط وكمّل بروفايلك واختار مواهبك"}</div></div></div>
-    <div id="nextSvc"></div>
+    <div id="khBanner"></div><div id="nextSvc"></div><div id="dailyV"></div>
     <div class="tiles">
       ${T("profile", "bust_in_silhouette", "بروفايلي")}
       ${T("services", "clipboard", "خدماتي")}
@@ -439,8 +446,18 @@ function pageHome(){
       ${T("search", "magnifying_glass_tilted_left", "ابحث عن خادم")}
       ${T("chats", "speech_balloon", "الرسائل", unreadCount())}
       <div class="tile" onclick="go('news')"><span class="badge" id="annBadge">${unseenAnns().length || ""}</span>${I("megaphone", "lg")}<b>الإعلانات</b></div>
+      ${T("churches", "church", "الكنائس")}
+      ${isPastor() ? T("mychurch", "busts_in_silhouette", "خدام كنيستي") : ""}
+      ${CMS.length ? `<div class="tile" onclick="go('churchmsgs')"><span class="badge" id="cmBadge">${unseenCM().length || ""}</span>${I("candle", "lg")}<b>رسائل كنيستي</b></div>` : ""}
       ${isAdmin() ? `<div class="tile" style="grid-column:span 2;display:flex;align-items:center;justify-content:center;gap:10px" onclick="go('admin')">${I("shield", "lg")}<b style="margin:0">الإدارة — ابعت إعلان أو دعوة للكل</b></div>` : ""}
     </div>`, false);
+  todayVerseCard().then(html => { const el = $("#dailyV"); if (el) el.innerHTML = html; });
+  loadDevs(true).then(devs => {
+    const st = khalwaStats(devs), el = $("#khBanner"); if (!el) return;
+    el.innerHTML = st.doneToday ? `<div class="card row" onclick="go('khalwa')" style="cursor:pointer">${I("glowing_star")}<div class="grow"><b>أخدت خلوتك النهارده ✓</b><div class="muted">${st.streak} يوم متواصل${st.missed ? ` • فاتك ${st.missed} يوم` : ""}</div></div></div>`
+      : `<div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,#fff8e1,#fff)"><div class="row">${I("candle", "lg")}<div class="grow"><b>خلوتك النهارده لسه ماخدتهاش</b><div class="muted">${khalwaWindowText() ? "ميعادك " + khalwaWindowText() + " • " : ""}${st.missed ? `فاتك ${st.missed} يوم خلوة` : "ابدأ أيامك المتواصلة"}</div></div></div>
+        <button class="btn block navy" onclick="kTab='read';go('khalwa')">${I("candle", "sm")} هاخد الخلوة دلوقتي</button></div>`;
+  }).catch(() => {});
   B.where("services", "ownerId", "==", B.uid).then(list => {
     const due = dueReminders(list);
     const up = list.filter(s => s.date >= today).sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time))[0];
@@ -470,6 +487,8 @@ function pageProfile(){
       <div class="chips" id="tal"></div>
       <div class="row" style="margin-top:10px"><input id="newTal" placeholder="موهبة تانية؟ مثال: عازف كمان"><button class="btn sm" id="addTal">إضافة</button></div>
     </div>
+    ${firstTime ? "" : `<div class="card">${isPastor() ? `<div class="row">${I("church", "lg")}<div class="grow"><b>راعي كنيسة</b><div class="muted">${h(ME.church || "")}</div></div><button class="btn sm navy" onclick="go('mychurch')">خدام كنيستي</button></div>`
+      : `<div class="row">${I("church", "lg")}<div class="grow"><b>إنت قسيس أو راعي كنيسة؟</b><div class="muted">سجّل كنيستك وابدأ تدير خدامها</div></div><button class="btn sm" onclick="becomePastorModal()">سجّل كنيستك</button></div>`}</div>`}
     <button class="btn block navy" id="pSave">${I("check_mark_button", "sm")} حفظ البروفايل</button>
     ${firstTime ? "" : `<button class="btn block" onclick="shareProfile()">${I("outbox_tray", "sm")} شارك لينك بروفايلي (واتساب)</button>
     <button class="btn block ghost" onclick="go('user/${B.uid}')">${I("bust_in_silhouette", "sm")} شوف بروفايلي زي ما الناس شايفاه</button>
@@ -524,6 +543,7 @@ function profileCardHtml(u){
   return `
   <div class="card" style="text-align:center;padding-top:20px;background:linear-gradient(180deg,#fff,#fbf7ee)">${avatar(u, "big")}
     <h2 style="margin:10px 0 2px">${h(u.name)}</h2>
+    ${u.role === "pastor" ? `<div><span class="tag" style="font-size:13px">${I("church", "sm")} راعي كنيسة</span></div>` : ""}
     ${u.church ? `<div class="muted">${I("church", "sm")} ${h(u.church)}</div>` : ""}
   </div>
   <div class="card"><h3>${I("sparkles")} موهبتي وخدمتي</h3><div class="chips" style="font-size:15px">${tal || '<span class="muted">لسه مختارش مواهب</span>'}</div></div>
@@ -597,7 +617,7 @@ async function setupNotifications(){
   try {
     let p = await L.checkPermissions(); if (p.display !== "granted") p = await L.requestPermissions();
     try { await L.createChannel({ id: "services", name: "تنبيهات الخدمات", importance: 5, sound: "default", vibration: true, visibility: 1 }); } catch (e) {}
-    L.addListener("localNotificationActionPerformed", () => go("services"));
+    L.addListener("localNotificationActionPerformed", a => { const k = a && a.notification && a.notification.extra && a.notification.extra.kind; if (k === "khalwa"){ kTab = "read"; go("khalwa"); } else if (k === "day") go("churchmsgs"); else go("services"); });
   } catch (e) {}
   return true;
 }
@@ -691,7 +711,7 @@ async function pageCalendar(){
   const now = new Date(); if (!calM) calM = new Date(now.getFullYear(), now.getMonth(), 1); if (!calSel) calSel = ymd(now);
   shell("التقويم", `<div class="card"><div class="row"><button class="btn sm ghost" id="cPrev">→</button><h3 class="grow" style="text-align:center;margin:0">${MONTHS[calM.getMonth()]} ${calM.getFullYear()}</h3><button class="btn sm ghost" id="cNext">←</button></div>
     <div class="cal" id="cal" style="margin-top:10px"></div>
-    <div class="row muted" style="margin-top:8px;gap:14px;justify-content:center"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold2)"></span> خدمة</span><span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6b8de3"></span> خلوة</span></div></div>
+    <div class="row muted" style="margin-top:8px;gap:14px;justify-content:center"><span><span class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold2)"></span> خدمة</span><span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#6b8de3"></span> خلوة</span><span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red)"></span> يوم روحي</span></div></div>
     <div id="dayList"></div>`);
   $("#cPrev").onclick = () => { calM = new Date(calM.getFullYear(), calM.getMonth() - 1, 1); pageCalendar(); };
   $("#cNext").onclick = () => { calM = new Date(calM.getFullYear(), calM.getMonth() + 1, 1); pageCalendar(); };
@@ -699,18 +719,21 @@ async function pageCalendar(){
   SVCS = svcs;
   const byDay = {}; svcs.forEach(s => (byDay[s.date] = byDay[s.date] || []).push(s));
   const devDay = {}; devs.forEach(d => devDay[d.date] = (devDay[d.date] || 0) + 1);
+  const dayEv = {}; CMS.filter(m => m.type === "day" && m.event).forEach(m => (dayEv[m.event.date] = dayEv[m.event.date] || []).push(m));
+  if (isPastor()) (await B.where("churchMsgs", "pastorId", "==", B.uid)).filter(m => m.type === "day" && m.event).forEach(m => (dayEv[m.event.date] = dayEv[m.event.date] || []).push(m));
   const first = calM.getDay(), off = (first + 1) % 7; // week starts Saturday
   const n = new Date(calM.getFullYear(), calM.getMonth() + 1, 0).getDate(), today = ymd(now);
   let html = ["سبت","أحد","اثنين","ثلاثاء","أربعاء","خميس","جمعة"].map(d => `<div class="h">${d}</div>`).join("");
   for (let i = 0; i < off; i++) html += `<div class="d o"></div>`;
   for (let d = 1; d <= n; d++){
     const k = `${calM.getFullYear()}-${pad(calM.getMonth() + 1)}-${pad(d)}`;
-    html += `<div class="d ${k === today ? "today" : ""} ${k === calSel ? "sel" : ""}" data-k="${k}">${d}<div class="dots">${(byDay[k] || []).slice(0, 3).map(() => '<span class="dot"></span>').join("")}${devDay[k] ? '<span class="dot k"></span>' : ""}</div></div>`;
+    html += `<div class="d ${k === today ? "today" : ""} ${k === calSel ? "sel" : ""}" data-k="${k}">${d}<div class="dots">${(byDay[k] || []).slice(0, 3).map(() => '<span class="dot"></span>').join("")}${devDay[k] ? '<span class="dot k"></span>' : ""}${dayEv[k] ? '<span class="dot" style="background:var(--red)"></span>' : ""}</div></div>`;
   }
   $("#cal").innerHTML = html;
   $("#cal").querySelectorAll("[data-k]").forEach(c => c.onclick = () => { calSel = c.dataset.k; pageCalendar(); });
   const list = (byDay[calSel] || []).sort((a, b) => a.time.localeCompare(b.time));
   $("#dayList").innerHTML = `<h3>${fmtDate(calSel)}</h3>${list.map(svcCard).join("") || `<div class="card muted">مكنتش في خدمة اليوم ده</div>`}
+    ${(dayEv[calSel] || []).map(m => `<div class="card" style="border:1.5px solid var(--gold)">${I("candle")} <b>يوم روحي: ${h(m.title)}</b><div class="muted">${fmtTime(m.event.time)}${m.event.place ? " — " + h(m.event.place) : ""} • ${h(m.churchName)}</div></div>`).join("")}
     ${devDay[calSel] ? `<div class="card" onclick="go('khalwa')" style="cursor:pointer">${I("candle")} أخدت خلوتك اليوم ده ✓</div>` : ""}
     <button class="btn block ghost" onclick="editSvc(null,{date:'${calSel}'})">${I("plus", "sm")} سجّل خدمة في اليوم ده</button>`;
   hydrate($("#dayList"));
@@ -797,9 +820,13 @@ function streakOf(devs){
 }
 async function pageKhalwa(){
   shell("خلوتي", `<div class="tabs"><button class="${kTab === "read" ? "on" : ""}" onclick="kTab='read';pageKhalwa()">${I("open_book", "sm")} اقرأ الكتاب المقدس</button><button class="${kTab === "log" ? "on" : ""}" onclick="kTab='log';pageKhalwa()">${I("scroll", "sm")} خلواتي</button></div><div id="kb"><div class="empty"><span class="spin"></span></div></div>`);
-  const devs = (await B.where("devotions", "ownerId", "==", B.uid)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-  const st = streakOf(devs), doneToday = devs.some(d => d.date === ymd(new Date()));
-  const head = `<div class="card streak">${I(doneToday ? "glowing_star" : "candle", "lg")}<div class="grow"><b>${st}</b> يوم متواصل<div class="muted">${doneToday ? "أخدت خلوتك النهارده، الرب يباركك ✓" : "لسه مأخدتش خلوة النهارده"}</div></div><div class="muted" style="text-align:center"><b style="font-size:18px;color:var(--navy)">${devs.length}</b><br>خلوة</div></div>`;
+  const devs = (await loadDevs(true)).slice().sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const K = khalwaStats(devs), doneToday = K.doneToday;
+  const box = (n, l, c) => `<div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:8px 4px;box-shadow:var(--sh)"><b style="font-size:24px;color:${c}">${n}</b><div class="muted" style="font-size:12px">${l}</div></div>`;
+  const head = `<div class="row" style="gap:8px;margin-bottom:10px">${box(K.streak, "يوم متواصل", "var(--gold2)")}${box(K.missed, "يوم فاتك", "var(--red)")}${box(K.total, "خلوة", "var(--navy)")}</div>
+    <div class="card streak" style="${doneToday ? "" : "border:2px solid var(--gold)"}">${I(doneToday ? "glowing_star" : "candle", "lg")}<div class="grow"><b style="font-size:16px">${doneToday ? "أخدت خلوتك النهارده، الرب يباركك ✓" : "لسه مأخدتش خلوة النهارده"}</b>
+      <div class="muted">${K.sinceLast > 1 && !doneToday ? `بقالك ${K.sinceLast} يوم من غير خلوة • ` : ""}${khalwaWindowText() ? "ميعادك " + khalwaWindowText() : "مفيش ميعاد ثابت"}</div></div>
+      <button class="btn sm ghost" onclick="khalwaTimeModal()">${I("alarm_clock", "sm")} ${ME.khalwaFrom ? "تعديل" : "حدد ميعاد"}</button></div>`;
   if (kTab === "log"){
     $("#kb").innerHTML = head + (devs.map(d => `<div class="card"><div class="row"><b class="grow">${I("open_book", "sm")} ${h(d.ref || "")}</b><span class="muted">${fmtDate(d.date)}</span><button class="btn sm red" onclick="delDev('${d.id}')">${I("wastebasket", "sm")}</button></div>
       ${d.golden ? `<div class="golden" style="margin-top:8px">${I("star", "sm")} ${h(d.golden)}</div>` : ""}
@@ -841,10 +868,11 @@ async function pageKhalwa(){
     if (!o.golden && !o.spoke) return toast("اكتب الآية الذهبية أو الرب كلمك في إيه");
     busy($("#dSave"), true);
     await B.add("devotions", { ...o, ref: `${bible[pos.b].n} ${pos.c + 1}`, date: ymd(new Date()), ownerId: B.uid, createdAt: Date.now() });
+    DEVS = null; syncKhalwaNotifs();
     toast("تم حفظ خلوتك، الرب يباركك 🕯️"); kTab = "log"; pageKhalwa();
   };
 }
-async function delDev(id){ if (!(await confirmBox("تحذف الخلوة دي؟"))) return; await B.del("devotions", id); pageKhalwa(); }
+async function delDev(id){ if (!(await confirmBox("تحذف الخلوة دي؟"))) return; await B.del("devotions", id); DEVS = null; syncKhalwaNotifs(); pageKhalwa(); }
 
 /* ================= library ================= */
 let BOOKS = [], libCat = "";
@@ -1041,7 +1069,7 @@ function watchAnns(){
     ANNS = list; renderNav();
     const r = curRoute()[0];
     if (r === "news") pageNews(); else if (r === "home") { const b = $("#annBadge"); if (b) b.textContent = unseenAnns().length || ""; }
-    setTimeout(() => { if (B.uid && unseenAnns().length && !annPopupOpen && !$("#ov") && !["chat", "news", "profile", "p"].includes(curRoute()[0])) showAnnPopup(); }, 600);
+    setTimeout(() => checkPopups(), 600);
   });
   B.where("annReplies", "uid", "==", B.uid).then(l => { MYREPLIES = {}; l.forEach(x => MYREPLIES[x.annId] = x.status); }).catch(() => {});
 }
@@ -1158,8 +1186,353 @@ function deleteAccountModal(){
     } catch (e){ busy($("#dGo"), false); toast(authErr(e)); }
   };
 }
+/* =====================================================================
+   النهارده: آية اليوم + تذكير الخلوة + رسائل الكنيسة (نوافذ فتح البرنامج)
+   ===================================================================== */
+let DAILY = null, DEVS = null, popupBusy = false, lastPopupCheck = 0, khalwaShownThisOpen = false;
+async function loadDaily(){ if (DAILY) return DAILY; try { DAILY = await (await fetch("daily.json")).json(); } catch (e){ DAILY = []; } return DAILY; }
+const dayNum = (d = new Date()) => Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86400000);
+async function todayVerse(){ const l = await loadDaily(); return l.length ? l[dayNum() % l.length] : null; }
+async function loadDevs(force){ if (DEVS && !force) return DEVS; DEVS = await B.where("devotions", "ownerId", "==", B.uid); return DEVS; }
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e){ return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const toMin = t => { if (!t) return null; const [a, b] = t.split(":").map(Number); return a * 60 + b; };
+const nowMin = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); };
+
+function khalwaStats(devs){
+  const days = new Set(devs.map(d => d.date)), today = ymd(new Date());
+  const doneToday = days.has(today);
+  // البداية: يوم إنشاء الحساب (أو أول خلوة لو أقدم)
+  let start = ME && ME.createdAt ? new Date(ME.createdAt) : new Date();
+  devs.forEach(d => { const x = new Date(d.date + "T00:00"); if (x < start) start = x; });
+  start = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+  let missed = 0, sinceLast = 0; const d = new Date(); d.setDate(d.getDate() - 1);
+  let counting = true;
+  while (d >= start){ if (!days.has(ymd(d))){ missed++; if (counting) sinceLast++; } else counting = false; d.setDate(d.getDate() - 1); }
+  return { doneToday, streak: streakOf(devs), missed, sinceLast, total: devs.length };
+}
+function khalwaWindowText(){ const f = ME && ME.khalwaFrom, t = ME && ME.khalwaTo; return f ? `من ${fmtTime(f)}${t ? " لـ " + fmtTime(t) : ""}` : ""; }
+
+async function todayVerseCard(){
+  const v = await todayVerse(); if (!v) return "";
+  return `<div class="card" style="background:linear-gradient(135deg,#0f1b2d,#2a4486);color:#fff">
+    <div class="row">${I("sparkles")}<b style="color:var(--gold)">رسالة ليك النهارده</b></div>
+    <div style="font-family:Amiri,serif;font-size:20px;line-height:1.9;margin-top:8px">«${h(v.t)}»</div>
+    <div style="color:var(--gold);font-weight:700;font-size:13px">(${h(v.r)})</div>
+    <div style="margin-top:8px;line-height:1.8;color:#e6ecfa">${h(v.m)}</div></div>`;
+}
+
+// النافذة اللي بتظهر أول ما تفتح البرنامج
+async function checkPopups(force){
+  if (!B.uid || !ME || !ME.name || popupBusy || $("#ov")) return;
+  if (["chat", "p", "profile"].includes(curRoute()[0])) return;
+  popupBusy = true;
+  try {
+    const today = ymd(new Date());
+    const devs = await loadDevs(true); const st = khalwaStats(devs);
+    const firstToday = lsGet("soc_today_" + B.uid) !== today;
+    const from = toMin(ME.khalwaFrom), to = toMin(ME.khalwaTo), nm = nowMin();
+    const khalwaDue = !khalwaShownThisOpen && !st.doneToday && (from === null || nm >= from);
+    const khalwaLate = !st.doneToday && to !== null && nm > to;
+    const parts = [];
+    if (firstToday) parts.push(await todayVerseCard());
+    if (khalwaDue) parts.push(`<div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,#fff8e1,#fff)">
+      <div class="row">${I("candle", "lg")}<div class="grow"><b style="font-size:17px">${khalwaLate ? "عدّى وقت خلوتك ولسه ماخدتهاش" : "خلوتك النهارده لسه ماخدتهاش"}</b>
+      <div class="muted">${khalwaWindowText() ? "ميعاد خلوتك " + khalwaWindowText() + " • " : ""}${st.missed ? `فاتك ${st.missed} يوم خلوة` : "كمّل الأيام المتواصلة"}${st.streak ? ` • ${st.streak} يوم متواصل` : ""}</div></div></div>
+      <button class="btn block navy" id="goKh">${I("candle", "sm")} هاخد الخلوة دلوقتي</button></div>`);
+    else if (firstToday && !st.doneToday && from !== null) parts.push(`<div class="card">${I("alarm_clock", "sm")} ميعاد خلوتك النهارده ${khalwaWindowText()}</div>`);
+    if (parts.length){
+      lsSet("soc_today_" + B.uid, today); khalwaShownThisOpen = true;
+      modal(`<h2>${I("dove")} سلام ونعمة يا ${h((ME.name || "").split(" ")[0])}</h2>${parts.join("")}<button class="btn block ghost" id="todayOk">تمام</button>`);
+      const o = $("#ov"); o.dataset.pop = "today";
+      $("#todayOk").onclick = () => closeModal();
+      if ($("#goKh")) $("#goKh").onclick = () => { closeModal(); kTab = "read"; go("khalwa"); };
+      return;
+    }
+    if (typeof unseenCM === "function" && unseenCM().length){ showCMPopup(); return; }
+    if (typeof unseenAnns === "function" && unseenAnns().length && !annPopupOpen && curRoute()[0] !== "news"){ showAnnPopup(); return; }
+  } catch (e){ console.warn("popups", e); }
+  finally { popupBusy = false; lastPopupCheck = Date.now(); }
+}
+let hiddenAt = 0;
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") hiddenAt = Date.now(); else if (hiddenAt && Date.now() - hiddenAt > 5 * 60000){ khalwaShownThisOpen = false; setTimeout(() => checkPopups(), 800); } });
+
+// تنبيه يومي على الموبايل بميعاد الخلوة
+async function syncKhalwaNotifs(){
+  const L = LN(); if (!L || !B.uid) return;
+  try {
+    await setupNotifications();
+    try { await L.createChannel({ id: "khalwa", name: "تذكير الخلوة", importance: 5, sound: "default", vibration: true, visibility: 1 }); } catch (e) {}
+    const pend = await L.getPending();
+    const old = (pend.notifications || []).filter(n => n.extra && n.extra.kind === "khalwa");
+    if (old.length) await L.cancel({ notifications: old.map(n => ({ id: n.id })) });
+    if (!ME.khalwaFrom) return;
+    const devs = await loadDevs(); const done = new Set(devs.map(d => d.date));
+    const [fh, fm] = ME.khalwaFrom.split(":").map(Number);
+    const list = []; const now = Date.now();
+    for (let i = 0; i < 10; i++){
+      const d = new Date(); d.setDate(d.getDate() + i); d.setHours(fh, fm, 0, 0);
+      if (d.getTime() <= now + 5000 || done.has(ymd(d))) continue;
+      list.push({ id: 900000 + i, channelId: "khalwa", title: "🕯️ ميعاد خلوتك", body: "وقت خلوتك مع الرب " + khalwaWindowText() + ". اقعد مع الكلمة شوية 🙏", schedule: { at: d, allowWhileIdle: true }, extra: { kind: "khalwa" } });
+    }
+    if (ME.khalwaTo){
+      const [th, tm] = ME.khalwaTo.split(":").map(Number); const d = new Date(); d.setHours(th, tm, 0, 0);
+      if (d.getTime() > now + 5000 && !done.has(ymd(d))) list.push({ id: 900050, channelId: "khalwa", title: "🕯️ لسه ماخدتش خلوتك النهارده", body: "الوقت قرب يخلص، افتح خلوتي واقرأ ولو أصحاح واحد 🙏", schedule: { at: d, allowWhileIdle: true }, extra: { kind: "khalwa" } });
+    }
+    if (list.length) await L.schedule({ notifications: list });
+  } catch (e){ console.warn("khalwa notif", e); }
+}
+
+function khalwaTimeModal(){
+  modal(`<h2>${I("alarm_clock")} ميعاد خلوتي اليومي</h2>
+    <p class="muted">البرنامج هيبعتلك تنبيه أول الميعاد، ولو الوقت عدّى ومخدتش الخلوة هيفكرك كل ما تفتح البرنامج.</p>
+    <div class="row"><div class="grow"><label>من الساعة</label><input id="kF" type="time" value="${h(ME.khalwaFrom || "14:00")}"></div><div class="grow"><label>لحد الساعة</label><input id="kT" type="time" value="${h(ME.khalwaTo || "16:00")}"></div></div>
+    <button class="btn block navy" id="kSave">حفظ الميعاد</button>
+    ${ME.khalwaFrom ? `<button class="btn block ghost" id="kOff" style="color:var(--red)">إلغاء الميعاد الثابت</button>` : ""}`);
+  $("#kSave").onclick = async () => {
+    const f = $("#kF").value, t = $("#kT").value; if (!f) return toast("حدد وقت البداية");
+    if (t && toMin(t) <= toMin(f)) return toast("وقت النهاية لازم يبقى بعد البداية");
+    await B.set("users", B.uid, { khalwaFrom: f, khalwaTo: t || "" }); ME.khalwaFrom = f; ME.khalwaTo = t || "";
+    closeModal(); toast("تم حفظ ميعاد خلوتك ✓"); syncKhalwaNotifs(); pageKhalwa();
+  };
+  if ($("#kOff")) $("#kOff").onclick = async () => { await B.set("users", B.uid, { khalwaFrom: "", khalwaTo: "" }); ME.khalwaFrom = ""; ME.khalwaTo = ""; closeModal(); syncKhalwaNotifs(); pageKhalwa(); };
+}
+
+/* =====================================================================
+   الكنائس + راعي الكنيسة + خدام كنيستي
+   ===================================================================== */
+const DEFAULT_SECTORS = ["اجتماع الفتيان", "اجتماع شباب ثانوي", "اجتماع الأرامل", "اجتماع الأسرة", "اجتماع مدارس الأحد", "اجتماع شباب عام", "اجتماع جامعة", "اجتماع آدم"];
+const isPastor = () => ME && ME.role === "pastor" && ME.churchId;
+let MYCH = null, MYSERV = [], CMS = [], cmUnsub = null;
+const mapsUrl = q => "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(q);
+
+async function createChurch(name, address){
+  const id = await B.add("churches", { name, nameN: norm(name), address, pastorId: B.uid, pastorName: ME ? ME.name : (window.__newName || ""), sectors: DEFAULT_SECTORS.slice(), leaders: {}, createdAt: Date.now() });
+  return id;
+}
+function becomePastorModal(){
+  modal(`<h2>${I("church")} أنا قسيس / راعي كنيسة</h2>
+    <label>اسم الكنيسة اللي برعاها</label><input id="cN" placeholder="مثال: كنيسة مارمرقس بشبرا">
+    <label>عنوان الكنيسة</label><input id="cA" placeholder="المدينة - المنطقة - الشارع">
+    <button class="btn block navy" id="cGo">${I("check_mark_button", "sm")} تسجيل الكنيسة</button>`);
+  $("#cGo").onclick = async () => {
+    const n = $("#cN").value.trim(), a = $("#cA").value.trim(); if (!n || !a) return toast("اكتب اسم الكنيسة وعنوانها");
+    busy($("#cGo"), true);
+    const cid = await createChurch(n, a);
+    await B.set("users", B.uid, { role: "pastor", churchId: cid, church: n }); Object.assign(ME, { role: "pastor", churchId: cid, church: n });
+    closeModal(); toast("تم تسجيل كنيستك ✓"); go("mychurch");
+  };
+}
+
+async function pageChurches(){
+  shell("الكنائس", `<input id="chq" placeholder="ابحث باسم الكنيسة أو المنطقة..." style="margin-bottom:12px">
+    ${isPastor() ? "" : `<button class="btn block ghost" style="margin:0 0 12px" onclick="becomePastorModal()">${I("church", "sm")} إنت قسيس؟ سجّل كنيستك</button>`}
+    <div id="chl"><div class="empty"><span class="spin"></span></div></div>`);
+  const all = (await B.all("churches")).filter(c => !c.deleted).sort((a, b) => (a.name || "").localeCompare(b.name || "", "ar"));
+  const draw = () => {
+    const q = norm($("#chq").value);
+    const l = all.filter(c => !q || norm(`${c.name} ${c.address} ${c.pastorName}`).includes(q));
+    $("#chl").innerHTML = `<div class="muted" style="margin-bottom:8px">${l.length} كنيسة</div>` + (l.map(c => `<div class="card">
+      <div class="row">${I("church", "lg")}<div class="grow"><b style="font-size:16px">${h(c.name)}</b>
+      <div class="muted">${I("round_pushpin", "sm")} ${h(c.address)}</div>
+      <div class="muted">${I("bust_in_silhouette", "sm")} الراعي: ${h(c.pastorName || "")}</div></div></div>
+      <div class="row" style="margin-top:8px"><a class="btn sm ghost grow" href="${mapsUrl(c.name + " " + c.address)}" target="_blank" rel="noopener" onclick="if(isNative()){openExt(this.href);return false}">${I("round_pushpin", "sm")} الخريطة</a>
+      ${c.pastorId !== B.uid ? `<button class="btn sm navy grow" onclick="go('user/${c.pastorId}')">${I("bust_in_silhouette", "sm")} الراعي</button><button class="btn sm grow" onclick="openChatWith('${c.pastorId}')">${I("speech_balloon", "sm")} مراسلة</button>` : `<button class="btn sm navy grow" onclick="go('mychurch')">${I("busts_in_silhouette", "sm")} خدام كنيستي</button>`}</div></div>`).join("")
+      || `<div class="empty">${I("church", "xl")}<p>لسه مفيش كنايس متسجلة</p></div>`);
+  };
+  $("#chq").oninput = draw; draw();
+}
+
+async function loadMyChurch(){
+  MYCH = await B.get("churches", ME.churchId);
+  MYSERV = await B.where("churchServants", "pastorId", "==", B.uid);
+  MYSERV = MYSERV.filter(s => s.churchId === ME.churchId);
+  return MYCH;
+}
+async function pageMyChurch(){
+  if (!isPastor()){ shell("خدام كنيستي", `<div class="empty">${I("church", "xl")}<p>الصفحة دي لراعي الكنيسة</p><button class="btn navy" onclick="becomePastorModal()">سجّل كنيستك</button></div>`); return; }
+  shell("خدام كنيستي", `<div class="empty"><span class="spin"></span></div>`);
+  const ch = await loadMyChurch(); if (!ch){ $("#pg").innerHTML = '<div class="empty">الكنيسة مش موجودة</div>' + footer(); return; }
+  const secs = ch.sectors || [];
+  const count = s => MYSERV.filter(x => x.sector === s).length;
+  const leaderOf = s => { const id = (ch.leaders || {})[s]; return MYSERV.find(x => x.id === id); };
+  $("#pg").innerHTML = `
+    <div class="hero">${I("church", "lg")}<div class="grow"><h2>${h(ch.name)}</h2><div class="muted">${h(ch.address)}</div></div>
+      <button class="btn sm ghost" onclick="editChurchModal()">${I("pencil", "sm")}</button></div>
+    <div class="row wrap2" style="margin-bottom:12px">
+      <button class="btn navy grow" onclick="churchMsgModal('all')">${I("megaphone", "sm")} رسالة لكل الخدام (${MYSERV.length})</button>
+      <button class="btn grow" onclick="spiritualDayModal()">${I("candle", "sm")} يوم روحي</button></div>
+    <h3>${I("busts_in_silhouette", "sm")} قطاعات الخدمة</h3>
+    ${secs.map((s, i) => { const L = leaderOf(s); return `<div class="item" onclick="go('sector/${i}')">${I("clipboard", "lg")}<div class="grow"><div class="t">${h(s)}</div>
+      <div class="muted">${count(s)} خادم${L ? ` • القائد العام: ${h(L.name)}` : ""}</div></div><span class="muted">←</span></div>`; }).join("")}
+    <button class="btn block ghost" onclick="addSectorModal()">${I("plus", "sm")} إضافة قطاع خدمة جديد</button>
+    <h3 style="margin-top:18px">${I("scroll", "sm")} الرسائل والأيام الروحية اللي اتبعتت</h3><div id="sent"></div>${footer()}`;
+  hydrate($("#pg"));
+  const sent = (await B.where("churchMsgs", "pastorId", "==", B.uid)).sort((a, b) => b.at - a.at).slice(0, 20);
+  $("#sent").innerHTML = sent.map(m => `<div class="card"><div class="row"><b class="grow">${I(m.type === "day" ? "candle" : "megaphone", "sm")} ${h(m.title || (m.type === "day" ? "يوم روحي" : "رسالة"))}</b><span class="muted">${ago(m.at)}</span></div>
+    <div class="muted">لـ ${m.scope === "all" ? "كل الخدام" : h(m.scope)} • وصلت لـ ${(m.targetUids || []).length} على البرنامج</div>
+    ${m.type === "day" && m.event ? `<div class="muted">${I("spiral_calendar", "sm")} ${fmtDate(m.event.date)} ${fmtTime(m.event.time)}${m.event.place ? " — " + h(m.event.place) : ""}</div>` : ""}
+    ${m.text ? `<div style="white-space:pre-wrap;margin-top:6px">${h(m.text)}</div>` : ""}
+    <button class="btn sm red" style="margin-top:6px" onclick="delCM('${m.id}')">${I("wastebasket", "sm")} حذف</button></div>`).join("") || '<div class="muted">لسه مبعتش رسايل</div>';
+}
+function editChurchModal(){
+  modal(`<h2>${I("church")} بيانات الكنيسة</h2><label>اسم الكنيسة</label><input id="cN" value="${h(MYCH.name)}"><label>العنوان</label><input id="cA" value="${h(MYCH.address)}"><button class="btn block navy" id="cGo">حفظ</button>`);
+  $("#cGo").onclick = async () => { const n = $("#cN").value.trim(), a = $("#cA").value.trim(); if (!n || !a) return toast("اكتب الاسم والعنوان"); await B.set("churches", MYCH.id, { name: n, nameN: norm(n), address: a, pastorName: ME.name }); await B.set("users", B.uid, { church: n }); ME.church = n; closeModal(); toast("تم الحفظ ✓"); pageMyChurch(); };
+}
+function addSectorModal(){
+  modal(`<h2>${I("plus")} قطاع خدمة جديد</h2><label>اسم القطاع</label><input id="sN" placeholder="مثال: اجتماع السيدات"><button class="btn block navy" id="sGo">إضافة</button>`);
+  $("#sGo").onclick = async () => { const n = $("#sN").value.trim(); if (!n) return toast("اكتب اسم القطاع"); const secs = [...(MYCH.sectors || [])]; if (secs.includes(n)) return toast("القطاع موجود"); secs.push(n); await B.set("churches", MYCH.id, { sectors: secs }); closeModal(); toast("تم ✓"); pageMyChurch(); };
+}
+async function pageSector(i){
+  if (!isPastor()) return go("home");
+  shell("قطاع خدمة", `<div class="empty"><span class="spin"></span></div>`);
+  await loadMyChurch(); const s = (MYCH.sectors || [])[+i]; if (!s){ go("mychurch"); return; }
+  const list = MYSERV.filter(x => x.sector === s).sort((a, b) => a.name.localeCompare(b.name, "ar"));
+  const lid = (MYCH.leaders || {})[s], L = list.find(x => x.id === lid);
+  $("#pg").innerHTML = `<h2 style="margin:0 0 10px">${I("clipboard")} ${h(s)}</h2>
+    <div class="card" style="background:linear-gradient(135deg,#fff8e1,#fff)">${I("crown")} <b>القائد العام:</b> ${L ? `${h(L.name)} <span class="muted" dir="ltr">${h(L.phone)}</span>` : '<span class="muted">لسه متحددش — اضغط على أي خادم واختاره قائد</span>'}</div>
+    <div class="row wrap2" style="margin-bottom:12px"><button class="btn navy grow" onclick="addServantModal(${+i})">${I("plus", "sm")} إضافة خادم</button>
+      <button class="btn grow" onclick="churchMsgModal(${+i})">${I("megaphone", "sm")} رسالة لكل القطاع (${list.length})</button></div>
+    ${list.map(x => `<div class="item" onclick="servantModal('${x.id}',${+i})">${I(x.id === lid ? "crown" : "bust_in_silhouette", "lg")}<div class="grow"><div class="t">${h(x.name)}${x.id === lid ? ' <span class="tag">القائد العام</span>' : ""}</div>
+      <div class="muted" dir="ltr" style="text-align:right">${h(x.phone)}</div>${x.uid ? '<span class="tag" style="background:#e3f5ec;color:var(--green)">على البرنامج ✓</span>' : '<span class="tag">مش على البرنامج (واتساب)</span>'}</div></div>`).join("")
+      || `<div class="empty">${I("busts_in_silhouette", "xl")}<p>لسه مفيش خدام في القطاع ده</p></div>`}
+    ${list.length ? "" : `<button class="btn block ghost" style="color:var(--red)" onclick="delSector(${+i})">${I("wastebasket", "sm")} حذف القطاع</button>`}${footer()}`;
+  hydrate($("#pg"));
+}
+async function findUserByPhone(ph){
+  const d = digits(ph); if (d.length < 8) return null;
+  try { const l = await B.where("users", "phone", "==", d); return l.find(u => !u.blocked && !u.deleted) || null; } catch (e){ return null; }
+}
+function addServantModal(i){
+  const s = MYCH.sectors[i];
+  modal(`<h2>${I("plus")} إضافة خادم لـ ${h(s)}</h2>
+    <label>اسم الخادم</label><input id="vN"><label>رقم التليفون</label><input id="vP" type="tel" dir="ltr" placeholder="01xxxxxxxxx">
+    <p class="muted">لو الخادم متسجل على البرنامج بنفس الرقم، الرسايل هتوصله جوه البرنامج. لو مش متسجل هتقدر تبعتله واتساب.</p>
+    <button class="btn block navy" id="vGo">إضافة</button>`);
+  $("#vGo").onclick = async () => {
+    const n = $("#vN").value.trim(), p = digits($("#vP").value); if (!n || p.length < 8) return toast("اكتب الاسم ورقم تليفون صحيح");
+    if (MYSERV.some(x => x.sector === s && x.phone === p)) return toast("الخادم ده موجود في القطاع");
+    busy($("#vGo"), true);
+    const u = await findUserByPhone(p);
+    await B.add("churchServants", { churchId: MYCH.id, pastorId: B.uid, sector: s, name: n, phone: p, uid: u ? u.id : "", createdAt: Date.now() });
+    closeModal(); toast(u ? `تم ✓ — ${u.name} على البرنامج` : "تم ✓"); pageSector(i);
+  };
+}
+function servantModal(id, i){
+  const x = MYSERV.find(v => v.id === id); if (!x) return; const s = MYCH.sectors[i]; const isL = (MYCH.leaders || {})[s] === id;
+  modal(`<h2>${I("bust_in_silhouette")} ${h(x.name)}</h2><div class="muted" dir="ltr" style="text-align:right;margin-bottom:10px">${h(x.phone)}</div>
+    ${x.uid ? `<button class="btn block navy" onclick="closeModal();openChatWith('${x.uid}')">${I("speech_balloon", "sm")} ابعتله رسالة في البرنامج</button>
+      <button class="btn block ghost" onclick="closeModal();go('user/${x.uid}')">${I("bust_in_silhouette", "sm")} البروفايل</button>` : `<div class="muted">الخادم ده مش متسجل على البرنامج لسه.</div><button class="btn block ghost" id="relink">${I("magnifying_glass_tilted_left", "sm")} دوّر عليه تاني على البرنامج</button>`}
+    <a class="btn block" style="background:#25d366;color:#fff;text-decoration:none" href="https://wa.me/${waNum(x.phone)}" target="_blank" rel="noopener" onclick="if(isNative()){openExt(this.href);return false}">${I("mobile_phone", "sm")} واتساب</a>
+    <a class="btn block ghost" style="text-decoration:none" href="tel:${h(x.phone)}">${I("telephone_receiver", "sm")} اتصال</a>
+    <button class="btn block ${isL ? "ghost" : ""}" id="mkL">${I("crown", "sm")} ${isL ? "إلغاء القائد العام" : "اجعله القائد العام للقطاع"}</button>
+    <button class="btn block red" id="rmV">${I("wastebasket", "sm")} حذف من القطاع</button>`);
+  $("#mkL").onclick = async () => { const leaders = { ...(MYCH.leaders || {}) }; if (isL) delete leaders[s]; else leaders[s] = id; await B.set("churches", MYCH.id, { leaders: null }); await B.set("churches", MYCH.id, { leaders }); closeModal(); toast("تم ✓"); pageSector(i); };
+  $("#rmV").onclick = async () => { if (!(await confirmBox(`تحذف ${x.name} من ${s}؟`))) return; await B.del("churchServants", id); closeModal(); pageSector(i); };
+  if ($("#relink")) $("#relink").onclick = async () => { const u = await findUserByPhone(x.phone); if (!u) return toast("لسه مش متسجل بالرقم ده"); await B.set("churchServants", id, { uid: u.id }); closeModal(); toast("تم ربطه بحسابه ✓"); pageSector(i); };
+}
+async function delSector(i){ const s = MYCH.sectors[i]; if (!(await confirmBox(`تحذف قطاع ${s}؟`))) return; const secs = MYCH.sectors.filter((_, k) => k !== i); await B.set("churches", MYCH.id, { sectors: secs }); go("mychurch"); }
+
+// رسالة لكل الخدام أو لقطاع
+async function relinkAll(list){
+  for (const x of list) if (!x.uid){ const u = await findUserByPhone(x.phone); if (u){ x.uid = u.id; B.set("churchServants", x.id, { uid: u.id }); } }
+  return list;
+}
+function churchMsgModal(scopeIdx, preset){
+  const scope = scopeIdx === "all" ? "all" : MYCH.sectors[scopeIdx];
+  let image = "";
+  modal(`<h2>${I("megaphone")} رسالة ${scope === "all" ? "لكل خدام الكنيسة" : "لقطاع " + h(scope)}</h2>
+    <label>العنوان</label><input id="mT" placeholder="مثال: اجتماع خدام مهم">
+    <label>الرسالة</label><textarea id="mX"></textarea>
+    <label>صورة (اختياري)</label><div id="mImg"></div><button class="btn sm ghost" id="mImgB">${I("camera", "sm")} اختار صورة</button><input type="file" id="mImgF" accept="image/*" hidden>
+    <div id="mSt" class="muted"></div>
+    <button class="btn block navy" id="mGo">${I("outbox_tray", "sm")} إرسال</button>`);
+  const drawI = () => { $("#mImg").innerHTML = image ? `<img data-f="${h(image)}" style="width:100%;border-radius:12px">` : ""; hydrate($("#mImg")); };
+  $("#mImgB").onclick = () => $("#mImgF").click();
+  $("#mImgF").onchange = async e => { try { const [f] = await uploadMany([e.target.files[0]], $("#mSt")); image = f.url; drawI(); } catch (er){ toast(er.message || "فشل الرفع"); } };
+  $("#mGo").onclick = async () => {
+    const title = $("#mT").value.trim(), text = $("#mX").value.trim(); if (!text && !image) return toast("اكتب الرسالة");
+    busy($("#mGo"), true);
+    await sendChurchMsg({ type: "msg", scope, title, text, image });
+  };
+}
+function spiritualDayModal(){
+  modal(`<h2>${I("candle")} يوم روحي</h2><p class="muted">هيوصل لكل خدام كنيستك، ويظهر في التقويم بتاعهم، ويجيلهم تنبيه قبلها بيوم.</p>
+    <label>اسم اليوم الروحي</label><input id="dT" placeholder="مثال: يوم صلاة وصوم للخدام">
+    <div class="row"><div class="grow"><label>التاريخ</label><input id="dD" type="date" value="${ymd(new Date())}"></div><div class="grow"><label>الوقت</label><input id="dH" type="time" value="10:00"></div></div>
+    <label>المكان</label><input id="dP" value="${h(MYCH ? MYCH.name : "")}">
+    <label>تفاصيل</label><textarea id="dX" style="min-height:70px"></textarea>
+    <label>يوصل لمين؟</label><select id="dS"><option value="all">كل خدام الكنيسة</option>${(MYCH.sectors || []).map((s, i) => `<option value="${i}">${h(s)}</option>`).join("")}</select>
+    <button class="btn block navy" id="dGo">${I("outbox_tray", "sm")} إرسال</button>`);
+  $("#dGo").onclick = async () => {
+    const title = $("#dT").value.trim(), date = $("#dD").value; if (!title || !date) return toast("اكتب الاسم والتاريخ");
+    const sv = $("#dS").value; busy($("#dGo"), true);
+    await sendChurchMsg({ type: "day", scope: sv === "all" ? "all" : MYCH.sectors[+sv], title, text: $("#dX").value.trim(), image: "", event: { date, time: $("#dH").value, place: $("#dP").value.trim() } });
+  };
+}
+async function sendChurchMsg(o){
+  const list = await relinkAll(MYSERV.filter(x => o.scope === "all" || x.sector === o.scope));
+  const targetUids = [...new Set(list.filter(x => x.uid && x.uid !== B.uid).map(x => x.uid))];
+  await B.add("churchMsgs", { ...o, churchId: MYCH.id, churchName: MYCH.name, pastorId: B.uid, pastorName: ME.name, targetUids, at: Date.now() });
+  const off = list.filter(x => !x.uid);
+  const wtext = `${o.type === "day" ? "🕯️ " : "📣 "}${o.title ? o.title + "\n" : ""}${o.text || ""}${o.event ? `\n📅 ${fmtDate(o.event.date)} ${fmtTime(o.event.time)}${o.event.place ? "\n📍 " + o.event.place : ""}` : ""}\n— ${MYCH.name}`;
+  closeModal();
+  toast(`وصلت لـ ${targetUids.length} خادم على البرنامج ✓`);
+  if (off.length){
+    modal(`<h2>${I("mobile_phone")} خدام مش على البرنامج (${off.length})</h2><p class="muted">ابعتلهم نفس الرسالة على واتساب:</p>
+      ${off.map(x => `<a class="file" style="text-decoration:none;color:inherit" href="https://wa.me/${waNum(x.phone)}?text=${encodeURIComponent(wtext)}" target="_blank" rel="noopener" onclick="if(isNative()){openExt(this.href);return false}">${I("mobile_phone")}<span class="n">${h(x.name)}</span><span class="muted" dir="ltr">${h(x.phone)}</span></a>`).join("")}
+      <button class="btn block ghost" onclick="closeModal()">تمام</button>`);
+  }
+  if (curRoute()[0] === "mychurch") pageMyChurch(); else if (curRoute()[0] === "sector") pageSector(curRoute()[1]);
+}
+async function delCM(id){ if (!(await confirmBox("تحذف الرسالة دي؟"))) return; await B.del("churchMsgs", id); pageMyChurch(); }
+
+// استقبال رسائل الكنيسة عند الخادم
+function watchCM(){
+  if (cmUnsub) cmUnsub();
+  cmUnsub = B.watch("churchMsgs", "targetUids", "array-contains", B.uid, list => {
+    CMS = list.sort((a, b) => b.at - a.at); renderNav();
+    if (curRoute()[0] === "churchmsgs") pageChurchMsgs();
+    const b = $("#cmBadge"); if (b) b.textContent = unseenCM().length || "";
+    syncDayNotifs();
+    setTimeout(() => checkPopups(), 900);
+  });
+}
+const unseenCM = () => { const seen = (ME && ME.cmSeen) || []; return CMS.filter(m => !seen.includes(m.id)); };
+async function markCMSeen(ids){ if (!ME || !ids.length) return; ME.cmSeen = [...new Set([...(ME.cmSeen || []), ...ids])].slice(-300); try { await B.set("users", B.uid, { cmSeen: ME.cmSeen }); } catch (e) {} const b = $("#cmBadge"); if (b) b.textContent = unseenCM().length || ""; }
+function cmCard(m){
+  return `<div class="card" style="border:1.5px solid ${m.type === "day" ? "var(--gold)" : "var(--line)"}">
+    <div class="row">${I(m.type === "day" ? "candle" : "church")}<div class="grow"><b>${h(m.title || (m.type === "day" ? "يوم روحي" : "رسالة من الكنيسة"))}</b><div class="muted">${h(m.churchName)} • ${h(m.pastorName || "")} • ${ago(m.at)}</div></div></div>
+    ${m.image ? `<img data-f="${h(m.image)}" onclick="openFile('${h(m.image)}',1)" style="width:100%;border-radius:14px;margin-top:8px;cursor:pointer;max-height:380px;object-fit:cover">` : ""}
+    ${m.text ? `<div style="white-space:pre-wrap;line-height:1.8;margin-top:8px">${h(m.text)}</div>` : ""}
+    ${m.type === "day" && m.event ? `<div style="background:#fff8e1;border-radius:12px;padding:10px;margin-top:8px"><div>${I("spiral_calendar", "sm")} ${fmtDate(m.event.date)} — ${fmtTime(m.event.time)}</div>${m.event.place ? `<div>${I("round_pushpin", "sm")} ${h(m.event.place)}</div>` : ""}</div>` : ""}
+    <button class="btn sm ghost" style="margin-top:8px" onclick="closeModal();openChatWith('${m.pastorId}')">${I("speech_balloon", "sm")} رد على الراعي</button></div>`;
+}
+function showCMPopup(){
+  const l = unseenCM(); if (!l.length) return;
+  modal(`<h2>${I("church")} رسالة من كنيستك</h2><div id="cmPop">${l.map(cmCard).join("")}</div><button class="btn block navy" id="cmOk">تمام</button>`);
+  $("#ov").dataset.pop = "cm"; $("#ov").dataset.ids = l.map(m => m.id).join(",");
+  $("#cmOk").onclick = () => closeModal();
+}
+function pageChurchMsgs(){
+  shell("رسائل كنيستي", CMS.map(cmCard).join("") || `<div class="empty">${I("church", "xl")}<p>مفيش رسايل من كنيستك لسه</p></div>`);
+  if (unseenCM().length) markCMSeen(CMS.map(m => m.id));
+}
+async function syncDayNotifs(){
+  const L = LN(); if (!L) return;
+  try {
+    await setupNotifications();
+    const pend = await L.getPending();
+    const old = (pend.notifications || []).filter(n => n.extra && n.extra.kind === "day");
+    if (old.length) await L.cancel({ notifications: old.map(n => ({ id: n.id })) });
+    const now = Date.now();
+    const items = CMS.filter(m => m.type === "day" && m.event && m.event.date).map(m => { const t = new Date(`${m.event.date}T${m.event.time || "09:00"}`); t.setDate(t.getDate() - 1); return { m, t }; }).filter(x => x.t.getTime() > now + 5000);
+    if (items.length) await L.schedule({ notifications: items.map(({ m, t }) => ({ id: notifId("day" + m.id), channelId: "services", title: "🕯️ بكرة: " + (m.title || "يوم روحي"), body: `${fmtDate(m.event.date)} ${fmtTime(m.event.time)} — ${m.event.place || m.churchName}`, schedule: { at: t, allowWhileIdle: true }, extra: { kind: "day" } })) });
+  } catch (e) {}
+}
+
 /* expose for inline handlers */
-Object.assign(window, { syncReminders, pageNews, composeAnn, replyAnn, annReplies, delAnn, shareProfile, pagePublic, go, openExt, openFile, renderAuth, editSvc, delSvc, editTopic, delTopic, delDev, editBook, delBook, openChatWith, inviteModal, answerInvite, adminBlock, pageKhalwa });
+Object.assign(window, { checkPopups, khalwaTimeModal, becomePastorModal, editChurchModal, addSectorModal, addServantModal, servantModal, delSector, churchMsgModal, spiritualDayModal, delCM, isNative, syncReminders, pageNews, composeAnn, replyAnn, annReplies, delAnn, shareProfile, pagePublic, go, openExt, openFile, renderAuth, editSvc, delSvc, editTopic, delTopic, delDev, editBook, delBook, openChatWith, inviteModal, answerInvite, adminBlock, pageKhalwa });
 </script>
 </body>
 </html>
