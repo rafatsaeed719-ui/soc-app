@@ -340,7 +340,7 @@ B.auth.onChange(async uid => {
   if (!ME){ ME = { id: uid, name: window.__newName || "", phone: B.phone, talents: [], custom: [] }; }
   if (curRoute()[0] === "p"){ watchChats(); watchAnns(); return pagePublic(curRoute()[1]); }
   if (ME.blocked){ toast("تم إيقاف هذا الحساب من الإدارة"); B.auth.signOut(); return; }
-  watchChats(); watchAnns(); watchCM(); syncReminders(); syncKhalwaNotifs();
+  watchChats(); watchAnns(); watchCM(); syncReminders(); syncKhalwaNotifs(); syncPlanNotifs();
   if (!ME.name) go("profile"); else route();
 });
 
@@ -359,7 +359,7 @@ function route(){
   closeModal(); window.scrollTo(0, 0);
   document.body.classList.remove("noNav");
   const [p, a] = curRoute();
-  const pages = { home: pageHome, profile: pageProfile, user: pageUser, services: pageServices, calendar: pageCalendar, topics: pageTopics, topic: pageTopic, khalwa: pageKhalwa, library: pageLibrary, book: pageBook, hymns: pageHymns, hymn: pageHymn, search: pageSearch, chats: pageChats, chat: pageChat, admin: pageAdmin, news: pageNews, churches: pageChurches, mychurch: pageMyChurch, sector: pageSector, churchmsgs: pageChurchMsgs };
+  const pages = { home: pageHome, profile: pageProfile, user: pageUser, services: pageServices, calendar: pageCalendar, topics: pageTopics, topic: pageTopic, khalwa: pageKhalwa, library: pageLibrary, book: pageBook, hymns: pageHymns, hymn: pageHymn, search: pageSearch, chats: pageChats, chat: pageChat, admin: pageAdmin, news: pageNews, churches: pageChurches, mychurch: pageMyChurch, sector: pageSector, churchmsgs: pageChurchMsgs, tasks: pageTasks, visits: pageVisits, visit: pageVisit };
   (pages[p] || pageHome)(a);
   renderNav();
   setTimeout(() => checkPopups(), 700);
@@ -449,6 +449,8 @@ function pageHome(){
       ${T("calendar", "spiral_calendar", "التقويم")}
       ${T("topics", "memo", "موضوعات")}
       ${T("khalwa", "candle", "خلوتي")}
+      ${T("tasks", "check_mark_button", "قائمة المهمات")}
+      ${T("visits", "house", "زياراتي")}
       ${T("library", "books", "المكتبة")}
       ${T("hymns", "musical_notes", "تسبيحنا")}
       ${T("search", "magnifying_glass_tilted_left", "ابحث عن خادم")}
@@ -625,7 +627,7 @@ async function setupNotifications(){
   try {
     let p = await L.checkPermissions(); if (p.display !== "granted") p = await L.requestPermissions();
     try { await L.createChannel({ id: "services", name: "تنبيهات الخدمات", importance: 5, sound: "default", vibration: true, visibility: 1 }); } catch (e) {}
-    L.addListener("localNotificationActionPerformed", a => { const k = a && a.notification && a.notification.extra && a.notification.extra.kind; if (k === "khalwa"){ kTab = "read"; go("khalwa"); } else if (k === "day") go("churchmsgs"); else go("services"); });
+    L.addListener("localNotificationActionPerformed", a => { const k = a && a.notification && a.notification.extra && a.notification.extra.kind; if (k === "khalwa"){ kTab = "read"; go("khalwa"); } else if (k === "day") go("churchmsgs"); else if (k === "task") go("tasks"); else if (k === "visit") go(a.notification.extra.vid ? "visit/" + a.notification.extra.vid : "visits"); else go("services"); });
   } catch (e) {}
   return true;
 }
@@ -712,6 +714,161 @@ function editSvc(id, preset){
   };
 }
 async function delSvc(id){ if (!(await confirmBox("تحذف الخدمة دي؟"))) return; await B.del("services", id); syncReminders(); toast("تم الحذف"); route(); }
+
+/* ================= قائمة المهمات ================= */
+const TCATS = [
+  { k: "ui", t: "مهمة ومستعجلة", c: "#c0392b", bg: "#fdecea" },
+  { k: "in", t: "مهمة بس مش مستعجلة", c: "#c98a00", bg: "#fff4d6" },
+  { k: "nn", t: "مش مهمة ومش مستعجلة", c: "#1e8e5a", bg: "#e6f5ec" }
+];
+const tCat = k => TCATS.find(x => x.k === k) || TCATS[2];
+let TASKS = [], tShowDone = false;
+async function pageTasks(){
+  shell("قائمة المهمات", `<button class="btn block navy" onclick="editTask()">${I("plus", "sm")} مهمة جديدة</button><div id="tl" style="margin-top:12px"><div class="empty"><span class="spin"></span></div></div>`);
+  TASKS = await B.where("tasks", "ownerId", "==", B.uid);
+  const open = TASKS.filter(t => !t.done), done = TASKS.filter(t => t.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+  const today = ymd(new Date());
+  const card = t => { const c = tCat(t.cat), late = !t.done && t.due && t.due < today;
+    return `<div class="card row" style="border-inline-start:6px solid ${c.c};background:${t.done ? "#f6f6f6" : c.bg};padding:10px 12px;margin-bottom:8px">
+      <button onclick="toggleTask('${t.id}')" style="width:30px;height:30px;border-radius:50%;border:2.5px solid ${c.c};background:${t.done ? c.c : "#fff"};color:#fff;font-weight:900;cursor:pointer;flex:none">${t.done ? "✓" : ""}</button>
+      <div class="grow" onclick="editTask('${t.id}')" style="cursor:pointer"><b style="${t.done ? "text-decoration:line-through;color:var(--muted)" : ""}">${h(t.title)}</b>
+        ${t.note ? `<div class="muted" style="white-space:pre-wrap;font-size:13px">${h(t.note)}</div>` : ""}
+        ${t.due ? `<div style="font-size:12.5px;font-weight:700;color:${late ? "var(--red)" : "var(--muted)"}">${I("spiral_calendar", "sm")} ${fmtDate(t.due)}${t.dueTime ? " " + fmtTime(t.dueTime) : ""}${late ? " • متأخرة" : t.due === today ? " • النهارده" : ""}</div>` : ""}</div>
+      <button class="btn sm red" onclick="delTask('${t.id}')">${I("wastebasket", "sm")}</button></div>`; };
+  const sortT = l => l.sort((a, b) => (a.due || "9999").localeCompare(b.due || "9999") || (a.createdAt || 0) - (b.createdAt || 0));
+  $("#tl").innerHTML = TCATS.map(c => { const l = sortT(open.filter(t => (t.cat || "nn") === c.k));
+    return `<div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px"><span style="width:14px;height:14px;border-radius:50%;background:${c.c};flex:none"></span><h3 style="margin:0;color:${c.c}" class="grow">${c.t}</h3><span class="badge" style="background:${c.c}">${l.length}</span></div>
+      ${l.map(card).join("") || `<div class="muted" style="padding:4px 10px 6px">مفيش مهمات هنا</div>`}`; }).join("")
+    + (done.length ? `<button class="btn block ghost" style="margin-top:14px" onclick="tShowDone=!tShowDone;pageTasks()">${I("check_mark_button", "sm")} المهمات اللي خلصت (${done.length}) ${tShowDone ? "▲" : "▼"}</button>${tShowDone ? done.map(card).join("") : ""}` : "");
+  hydrate($("#tl"));
+}
+function editTask(id, preCat){
+  const t = id ? TASKS.find(x => x.id === id) : { cat: preCat || "ui" };
+  let cat = t.cat || "ui";
+  modal(`<h2>${I("check_mark_button")} ${id ? "تعديل المهمة" : "مهمة جديدة"}</h2>
+    <label>المهمة</label><input id="tT" value="${h(t.title || "")}" placeholder="مثال: أحضّر درس الجمعة">
+    <label>نوع المهمة</label><div id="tC">${TCATS.map(c => `<button type="button" data-k="${c.k}" style="display:block;width:100%;text-align:start;margin-bottom:6px;padding:11px 12px;border-radius:12px;font-weight:700;cursor:pointer;border:2px solid ${c.c};background:${c.bg};color:${c.c}">${c.t}</button>`).join("")}</div>
+    <div class="row"><div class="grow"><label>الميعاد (اختياري)</label><input id="tD" type="date" value="${h(t.due || "")}"></div><div class="grow"><label>الساعة (اختياري)</label><input id="tH" type="time" value="${h(t.dueTime || "")}"></div></div>
+    <label>تفاصيل (اختياري)</label><textarea id="tN" style="min-height:70px">${h(t.note || "")}</textarea>
+    <button class="btn block navy" id="tSave">حفظ</button>`);
+  const paint = () => $("#tC").querySelectorAll("button").forEach(b => { const c = tCat(b.dataset.k), on = b.dataset.k === cat; b.style.background = on ? c.c : c.bg; b.style.color = on ? "#fff" : c.c; b.textContent = (on ? "✓ " : "") + c.t; });
+  $("#tC").querySelectorAll("button").forEach(b => b.onclick = () => { cat = b.dataset.k; paint(); }); paint();
+  $("#tSave").onclick = async () => {
+    const o = { title: $("#tT").value.trim(), cat, due: $("#tD").value, dueTime: $("#tH").value, note: $("#tN").value.trim() };
+    if (!o.title) return toast("اكتب المهمة");
+    busy($("#tSave"), true);
+    if (id) await B.set("tasks", id, o); else await B.add("tasks", { ...o, done: false, ownerId: B.uid, createdAt: Date.now() });
+    closeModal(); toast("تم الحفظ ✓"); syncPlanNotifs(); pageTasks();
+  };
+}
+async function toggleTask(id){ const t = TASKS.find(x => x.id === id); if (!t) return; await B.set("tasks", id, { done: !t.done, doneAt: t.done ? 0 : Date.now() }); if (!t.done) toast("برافو، خلصت المهمة ✓"); syncPlanNotifs(); pageTasks(); }
+async function delTask(id){ if (!(await confirmBox("تحذف المهمة دي؟"))) return; await B.del("tasks", id); syncPlanNotifs(); pageTasks(); }
+
+/* ================= زياراتي ================= */
+let VISITS = [];
+const daysAgo = d => Math.round((new Date(ymd(new Date()) + "T00:00") - new Date(d + "T00:00")) / 86400000);
+const agoText = d => { const n = daysAgo(d); return n <= 0 ? "النهارده" : n === 1 ? "امبارح" : n === 2 ? "من يومين" : n <= 10 ? `من ${n} أيام` : `من ${n} يوم`; };
+const lastVisit = p => (p.log || []).slice().sort((a, b) => b.date.localeCompare(a.date))[0];
+async function loadVisits(){ VISITS = await B.where("visits", "ownerId", "==", B.uid); return VISITS; }
+async function pageVisits(){
+  shell("زياراتي", `<button class="btn block navy" onclick="editVisitPerson()">${I("plus", "sm")} ضيف حد عايز تزوره</button>
+    <input id="vQ" placeholder="دوّر بالاسم..." style="margin-top:10px"><div id="vl" style="margin-top:10px"><div class="empty"><span class="spin"></span></div></div>`);
+  await loadVisits();
+  const today = ymd(new Date());
+  const draw = () => {
+    const q = norm($("#vQ").value || "");
+    const l = VISITS.filter(p => !q || norm(p.name).includes(q)).sort((a, b) => (a.next || "9999").localeCompare(b.next || "9999") || a.name.localeCompare(b.name));
+    $("#vl").innerHTML = l.map(p => { const lv = lastVisit(p), n = (p.log || []).length, late = p.next && p.next < today;
+      return `<div class="card" onclick="go('visit/${p.id}')" style="cursor:pointer${p.next === today ? ";border:2px solid var(--gold)" : late ? ";border:2px solid var(--red)" : ""}">
+        <div class="row"><span style="font-size:0">${I("house", "lg")}</span><div class="grow"><b style="font-size:16px">${h(p.name)}</b>
+          <div class="muted" style="font-size:13px">${lv ? `آخر زيارة: ${fmtDate(lv.date)} (${agoText(lv.date)})` : "لسه مزرتوش"} • ${n} زيارة</div>
+          ${p.next ? `<div style="font-size:13px;font-weight:700;color:${late ? "var(--red)" : p.next === today ? "var(--gold2)" : "var(--navy)"}">${I("alarm_clock", "sm")} ميعاد الزيارة: ${fmtDate(p.next)}${p.nextTime ? " " + fmtTime(p.nextTime) : ""}${late ? " • فات ميعادها" : p.next === today ? " • النهارده" : ""}</div>` : ""}</div></div></div>`; }).join("")
+      || `<div class="empty">${I("house", "xl")}<p>${VISITS.length ? "مفيش حد بالاسم ده" : "لسه مضفتش حد. اضغط \"ضيف حد عايز تزوره\""}</p></div>`;
+    hydrate($("#vl"));
+  };
+  $("#vQ").oninput = draw; draw();
+}
+async function pageVisit(id){
+  shell("زيارة", `<div id="vp"><div class="empty"><span class="spin"></span></div></div>`);
+  if (!VISITS.length) await loadVisits();
+  const p = VISITS.find(x => x.id === id) || await B.get("visits", id);
+  if (!p) { $("#vp").innerHTML = `<div class="empty">مش لاقي الشخص ده</div>`; return; }
+  const log = (p.log || []).slice().sort((a, b) => b.date.localeCompare(a.date)), lv = log[0], today = ymd(new Date());
+  const reasons = {}; log.forEach(x => { if (x.reason) reasons[x.reason] = (reasons[x.reason] || 0) + 1; });
+  const box = (n, l, c) => `<div style="flex:1;text-align:center;background:#fff;border-radius:14px;padding:8px 4px;box-shadow:var(--sh)"><b style="font-size:${String(n).length > 6 ? 15 : 22}px;color:${c}">${n}</b><div class="muted" style="font-size:12px">${l}</div></div>`;
+  $("#vp").innerHTML = `<div class="card" style="text-align:center">${I("house", "xl")}<h2 style="margin:6px 0">${h(p.name)}</h2>
+      ${p.address ? `<div class="muted">${I("round_pushpin", "sm")} ${h(p.address)}</div>` : ""}${p.note ? `<div class="muted" style="white-space:pre-wrap;margin-top:4px">${h(p.note)}</div>` : ""}
+      ${p.phone ? `<div class="row" style="margin-top:10px"><a class="btn sm grow" style="background:#25d366;color:#fff;text-decoration:none" href="https://wa.me/${waNum(p.phone)}" target="_blank" rel="noopener" onclick="if(isNative()){openExt(this.href);return false}">${I("mobile_phone", "sm")} واتساب</a><a class="btn sm ghost grow" style="text-decoration:none" href="tel:${h(p.phone)}">${I("telephone_receiver", "sm")} اتصال</a></div>` : ""}</div>
+    <div class="row" style="gap:8px;margin-bottom:10px">${box(log.length, "مرة زرته", "var(--navy)")}${box(lv ? agoText(lv.date) : "—", "آخر زيارة", "var(--gold2)")}</div>
+    <div class="card" style="${p.next === today ? "border:2px solid var(--gold)" : p.next && p.next < today ? "border:2px solid var(--red)" : ""}"><div class="row">${I("alarm_clock")}<div class="grow"><b>ميعاد الزيارة الجاية</b><div class="muted">${p.next ? fmtDate(p.next) + (p.nextTime ? " الساعة " + fmtTime(p.nextTime) : "") + (p.next < today ? " • فات ميعادها" : "") : "مفيش ميعاد محدد"}</div></div><button class="btn sm ghost" onclick="editVisitPerson('${p.id}')">${I("pencil", "sm")} ${p.next ? "تعديل" : "حدد"}</button></div></div>
+    <button class="btn block navy" onclick="logVisit('${p.id}')">${I("check_mark_button", "sm")} زرته — سجّل الزيارة</button>
+    ${Object.keys(reasons).length > 1 ? `<div class="card" style="margin-top:12px"><b>${I("bar_chart", "sm")} زرته ليه</b><div style="margin-top:6px">${Object.entries(reasons).sort((a, b) => b[1] - a[1]).map(([r, n]) => `<span style="display:inline-block;background:#fff4d6;border-radius:20px;padding:3px 10px;margin:3px;font-size:13px;font-weight:700">${h(r)} × ${n}</span>`).join("")}</div></div>` : ""}
+    <h3 style="margin-top:16px">${I("scroll", "sm")} سجل الزيارات (${log.length})</h3>
+    ${log.map((x, i) => `<div class="card"><div class="row"><b class="grow">${I("spiral_calendar", "sm")} ${fmtDate(x.date)}${x.time ? " • " + fmtTime(x.time) : ""}</b><span class="muted" style="font-size:12px">زيارة رقم ${log.length - i}</span><button class="btn sm red" onclick="delVisitLog('${p.id}','${x.id}')">${I("wastebasket", "sm")}</button></div>
+      ${x.reason ? `<div style="margin-top:6px"><b>سبب الزيارة:</b> ${h(x.reason)}</div>` : ""}${x.note ? `<div class="muted" style="white-space:pre-wrap;margin-top:4px">${h(x.note)}</div>` : ""}</div>`).join("") || `<div class="card muted">لسه مزرتوش</div>`}
+    <button class="btn block ghost" style="margin-top:12px;color:var(--red)" onclick="delVisitPerson('${p.id}')">${I("wastebasket", "sm")} حذف من زياراتي</button>`;
+  hydrate($("#vp"));
+}
+function editVisitPerson(id){
+  const p = id ? VISITS.find(x => x.id === id) : {};
+  modal(`<h2>${I("house")} ${id ? "تعديل" : "حد عايز تزوره"}</h2>
+    <label>الاسم</label><input id="vN" value="${h(p.name || "")}" placeholder="مثال: عم جرجس">
+    <label>رقم التليفون (اختياري)</label><input id="vPh" type="tel" dir="ltr" value="${h(p.phone || "")}">
+    <label>العنوان (اختياري)</label><input id="vA" value="${h(p.address || "")}">
+    <div class="row"><div class="grow"><label>ميعاد الزيارة</label><input id="vD" type="date" value="${h(p.next || "")}"></div><div class="grow"><label>الساعة</label><input id="vT" type="time" value="${h(p.nextTime || "")}"></div></div>
+    <label>ملاحظات (اختياري)</label><textarea id="vNo" style="min-height:60px" placeholder="مثال: عيان، محتاج صلاة">${h(p.note || "")}</textarea>
+    <button class="btn block navy" id="vSave">حفظ</button>`);
+  $("#vSave").onclick = async () => {
+    const o = { name: $("#vN").value.trim(), phone: $("#vPh").value.trim(), address: $("#vA").value.trim(), next: $("#vD").value, nextTime: $("#vT").value, note: $("#vNo").value.trim() };
+    if (!o.name) return toast("اكتب الاسم");
+    busy($("#vSave"), true);
+    let nid = id; if (id) await B.set("visits", id, o); else nid = await B.add("visits", { ...o, log: [], ownerId: B.uid, createdAt: Date.now() });
+    await loadVisits(); syncPlanNotifs(); closeModal(); toast("تم الحفظ ✓");
+    if (curRoute()[0] === "visit") pageVisit(nid); else go("visit/" + nid);
+  };
+}
+function logVisit(id){
+  const p = VISITS.find(x => x.id === id); if (!p) return;
+  const now = new Date();
+  modal(`<h2>${I("check_mark_button")} زيارة ${h(p.name)}</h2>
+    <div class="row"><div class="grow"><label>يوم الزيارة</label><input id="lD" type="date" value="${ymd(now)}"></div><div class="grow"><label>الساعة</label><input id="lT" type="time" value="${pad(now.getHours())}:${pad(now.getMinutes())}"></div></div>
+    <label>زرته ليه؟</label><input id="lR" placeholder="مثال: افتقاد، عيان، مناسبة، صلاة">
+    <div id="lRs" style="margin-top:6px">${["افتقاد", "عيان", "صلاة", "مناسبة", "مشكلة", "تشجيع"].map(r => `<button type="button" class="btn sm ghost" style="margin:2px">${r}</button>`).join("")}</div>
+    <label>إيه اللي حصل في الزيارة (اختياري)</label><textarea id="lN" style="min-height:70px"></textarea>
+    <label>ميعاد الزيارة الجاية (اختياري)</label><div class="row"><input id="lX" type="date" class="grow"><input id="lXT" type="time" class="grow"></div>
+    <button class="btn block navy" id="lSave">حفظ الزيارة</button>`);
+  $("#lRs").querySelectorAll("button").forEach(b => b.onclick = () => { $("#lR").value = b.textContent; });
+  $("#lSave").onclick = async () => {
+    const e = { id: uidGen(), date: $("#lD").value, time: $("#lT").value, reason: $("#lR").value.trim(), note: $("#lN").value.trim() };
+    if (!e.date) return toast("حدد يوم الزيارة");
+    busy($("#lSave"), true);
+    const o = { log: [...(p.log || []), e] };
+    const nx = $("#lX").value;
+    if (nx) { o.next = nx; o.nextTime = $("#lXT").value; } else if (p.next && p.next <= e.date) { o.next = ""; o.nextTime = ""; }
+    await B.set("visits", id, o); await loadVisits(); syncPlanNotifs();
+    closeModal(); toast("تم تسجيل الزيارة، الرب يبارك خدمتك 🙏"); pageVisit(id);
+  };
+}
+async function delVisitLog(pid, lid){ const p = VISITS.find(x => x.id === pid); if (!p || !(await confirmBox("تحذف الزيارة دي من السجل؟"))) return; await B.set("visits", pid, { log: (p.log || []).filter(x => x.id !== lid) }); await loadVisits(); pageVisit(pid); }
+async function delVisitPerson(id){ if (!(await confirmBox("تحذفه من زياراتي؟ هيتمسح سجل زياراته كمان"))) return; await B.del("visits", id); await loadVisits(); syncPlanNotifs(); go("visits"); }
+
+// تنبيهات المهمات والزيارات على الموبايل
+async function syncPlanNotifs(){
+  const L = LN(); if (!L || !B.uid) return;
+  try {
+    await setupNotifications();
+    try { await L.createChannel({ id: "plan", name: "تنبيهات المهمات والزيارات", importance: 5, sound: "default", vibration: true, visibility: 1 }); } catch (e) {}
+    const pend = await L.getPending();
+    const old = (pend.notifications || []).filter(n => n.extra && (n.extra.kind === "task" || n.extra.kind === "visit"));
+    if (old.length) await L.cancel({ notifications: old.map(n => ({ id: n.id })) });
+    const [tasks, visits] = await Promise.all([B.where("tasks", "ownerId", "==", B.uid), B.where("visits", "ownerId", "==", B.uid)]);
+    const now = Date.now(), list = [];
+    const at = (d, t) => { const x = new Date(d + "T" + (t || "09:00")); return x; };
+    tasks.filter(t => !t.done && t.due).forEach(t => { const d = at(t.due, t.dueTime); if (d.getTime() > now + 5000) list.push({ id: notifId("t" + t.id), channelId: "plan", title: "✅ مهمة: " + t.title, body: tCat(t.cat).t + (t.dueTime ? " • الساعة " + fmtTime(t.dueTime) : ""), schedule: { at: d, allowWhileIdle: true }, extra: { kind: "task" } }); });
+    visits.filter(v => v.next).forEach(v => { const d = at(v.next, v.nextTime); if (d.getTime() > now + 5000) list.push({ id: notifId("v" + v.id), channelId: "plan", title: "🏠 ميعاد زيارة " + v.name, body: (v.nextTime ? "الساعة " + fmtTime(v.nextTime) : "النهارده") + (v.address ? " — " + v.address : ""), schedule: { at: d, allowWhileIdle: true }, extra: { kind: "visit", vid: v.id } }); });
+    if (list.length) await L.schedule({ notifications: list.slice(0, 60) });
+  } catch (e){ console.warn("plan notifs", e); }
+}
 
 /* ================= calendar ================= */
 let calM = null, calSel = null;
@@ -1643,7 +1800,7 @@ async function syncDayNotifs(){
 }
 
 /* expose for inline handlers */
-Object.assign(window, { TASBE7NA, editHymn, delHymn, checkPopups, khalwaTimeModal, becomePastorModal, editChurchModal, addSectorModal, addServantModal, servantModal, delSector, churchMsgModal, spiritualDayModal, delCM, isNative, syncReminders, pageNews, composeAnn, replyAnn, annReplies, delAnn, shareProfile, pagePublic, go, openExt, openFile, renderAuth, editSvc, delSvc, editTopic, delTopic, delDev, editBook, delBook, openChatWith, inviteModal, answerInvite, adminBlock, pageKhalwa });
+Object.assign(window, { editTask, toggleTask, delTask, editVisitPerson, logVisit, delVisitLog, delVisitPerson, pageTasks, TASBE7NA, editHymn, delHymn, checkPopups, khalwaTimeModal, becomePastorModal, editChurchModal, addSectorModal, addServantModal, servantModal, delSector, churchMsgModal, spiritualDayModal, delCM, isNative, syncReminders, pageNews, composeAnn, replyAnn, annReplies, delAnn, shareProfile, pagePublic, go, openExt, openFile, renderAuth, editSvc, delSvc, editTopic, delTopic, delDev, editBook, delBook, openChatWith, inviteModal, answerInvite, adminBlock, pageKhalwa });
 </script>
 </body>
 </html>
